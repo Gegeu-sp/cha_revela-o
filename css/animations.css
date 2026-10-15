@@ -1,9 +1,25 @@
-/* css/animations.css - Efeitos Visuais & Animações Premium */
+/* css/animations.css - Efeitos Visuais & Design System com Paleta Exclusiva */
+
+:root {
+    --color-p1: #3B0069; /* Roxo Imperial Escuro */
+    --color-p2: #8F56AD; /* Ametista / Violeta Médio */
+    --color-p3: #BE9ECF; /* Lavanda Suave */
+    --color-p4: #CEE1DF; /* Menta Gelo / Aqua Pálido */
+    --color-p5: #689D97; /* Verde Sálvia / Teal Médio */
+    --color-p6: #03665A; /* Verde Esmeralda Profundo */
+}
 
 /* Resets e Alinhamento Responsivo Global */
 html, body {
     overflow-x: hidden;
     width: 100%;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 img {
@@ -19,19 +35,19 @@ img {
 /* Efeito de pulso e brilho (Glow) para o líder da disputa */
 @keyframes leader-glow-boy {
     0%, 100% {
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.4), inset 0 0 10px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 16px rgba(3, 102, 90, 0.35), inset 0 0 10px rgba(3, 102, 90, 0.15);
     }
     50% {
-        box-shadow: 0 0 25px rgba(59, 130, 246, 0.7), inset 0 0 15px rgba(59, 130, 246, 0.4);
+        box-shadow: 0 0 28px rgba(3, 102, 90, 0.65), inset 0 0 14px rgba(3, 102, 90, 0.3);
     }
 }
 
 @keyframes leader-glow-girl {
     0%, 100% {
-        box-shadow: 0 0 15px rgba(236, 72, 153, 0.4), inset 0 0 10px rgba(236, 72, 153, 0.2);
+        box-shadow: 0 0 16px rgba(143, 86, 173, 0.35), inset 0 0 10px rgba(143, 86, 173, 0.15);
     }
     50% {
-        box-shadow: 0 0 25px rgba(236, 72, 153, 0.7), inset 0 0 15px rgba(236, 72, 153, 0.4);
+        box-shadow: 0 0 28px rgba(143, 86, 173, 0.65), inset 0 0 14px rgba(143, 86, 173, 0.3);
     }
 }
 
@@ -73,6 +89,25 @@ img {
     border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
+/* Classes utilitárias da paleta de cores personalizada */
+.bg-palette-gradient {
+    background: linear-gradient(135deg, #03665A 0%, #689D97 35%, #8F56AD 70%, #3B0069 100%);
+}
+
+.bg-boy-gradient {
+    background: linear-gradient(135deg, #689D97 0%, #03665A 100%);
+}
+
+.bg-girl-gradient {
+    background: linear-gradient(135deg, #8F56AD 0%, #3B0069 100%);
+}
+
+.text-palette-gradient {
+    background: linear-gradient(135deg, #03665A 0%, #8F56AD 50%, #3B0069 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 /* Toast de notificações animado */
 #toast-container {
     position: fixed;
@@ -104,7 +139,7 @@ img {
     }
 }
 
-/* Barra de rolagem refinada para tabelas no mobile */
+/* Barra de rolagem estético e autocontida para tabelas */
 ::-webkit-scrollbar {
     height: 6px;
     width: 6px;

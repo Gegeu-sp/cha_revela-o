@@ -2,11 +2,11 @@
 
 **Feature Branch**: `001-rifa-bolao-admin`
 
-**Created**: 2026-10-14 | **Last Updated**: 2026-10-14
+**Created**: 2026-10-14 | **Last Updated**: 2026-10-15
 
-**Status**: Ready for Planning
+**Status**: Ready for Planning (Updated with Custom Palette, Cross-Device Sync & Framing Refinements)
 
-**Input**: User description: "editar e colocar o nomes que serão dos filhos do menino e da menina. na area do admin local para confirma quem fez o pix. local para reiniciar o bolão para eu começar do zero. quero subir um site para firebase para deixar online, para o pagamento deixar a chave pix ou a pessoa copiar o qcode tbm para ser mais facil. ajustar o alinhamento da pagina e tanto web tanto para mobile"
+**Input**: User description: "trocar a cor da lading page para as cores em anexo (#3B0069, #8F56AD, #BE9ECF, #CEE1DF, #689D97, #03665A). alem disso, quando atualizo a pagina e nas configurações nao esta atualizando a pagina quando abro em outro dispositivo. alem disso, melhor o enquadramento do site tanto web e o mobile. arrumar tudo subir para github e firebase"
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -89,9 +89,12 @@ Como administrador ou participante, quero usufruir de um layout perfeitamente al
 - **FR-005**: O sistema DEVE gerar e exibir um QR Code Pix dinâmico para facilitar o pagamento tanto em computadores quanto em smartphones.
 - **FR-006**: O sistema DEVE disponibilizar botão de 1 clique para "Copiar Chave Pix" e "Copiar Código Pix Copia e Cola".
 - **FR-007**: O sistema DEVE incluir arquivos de configuração para deploy no Firebase Hosting (`firebase.json` e `.firebaserc`).
-- **FR-008**: O layout DEVE ter alinhamento simétrico, margens consistentes e responsividade total testada tanto em telas mobile (320px-480px) quanto em telas desktop.
+- **FR-008**: O layout DEVE ter enquadramento perfeito, margens e padding simétricos e responsividade total testada tanto em telas mobile (320px-480px) quanto em telas desktop, eliminando rolagem horizontal indesejada e proporcionando espaçamento arejado.
 - **FR-009**: O administrador DEVE poder autenticar via e-mail e senha, com persistência de sessão.
 - **FR-010**: O sistema DEVE atualizar placares, contadores e tabelas em tempo real via Firestore com fallback local resiliente.
+- **FR-011**: O sistema DEVE aplicar a paleta de cores personalizada fornecida nas imagens do evento: escala Lilás/Roxo (`#3B0069`, `#8F56AD`, `#BE9ECF`) e escala Esmeralda/Menta (`#03665A`, `#689D97`, `#CEE1DF`), substituindo o padrão azul/rosa anterior por um design sofisticado e equilibrado.
+- **FR-012**: As configurações do evento e novos palpites DEVEM sincronizar entre diferentes dispositivos em tempo real, garantindo que alterações feitas no computador ou celular dos pais reflitam instantaneamente no celular dos convidados.
+- **FR-013**: O projeto DEVE estar pronto para deploy automatizado no Firebase Hosting e versionado no repositório GitHub.
 
 ### Key Entities
 

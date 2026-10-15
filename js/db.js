@@ -70,11 +70,22 @@ export async function initDatabase() {
 
             // Listener em tempo real para configurações do evento
             const configRef = doc(db, 'settings', 'event_config');
+            const { setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            
             onSnapshot(configRef, (snapshot) => {
-                const data = snapshot.exists() ? snapshot.data() : defaultEventSettings;
-                notifyConfigListeners(data);
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    localStorage.setItem('bolao_event_settings', JSON.stringify(data));
+                    notifyConfigListeners(data);
+                } else {
+                    // Inicializa o documento no Firestore se for a primeira vez
+                    const initialConfig = getLocalConfig();
+                    setDoc(configRef, initialConfig, { merge: true }).catch(() => {});
+                    notifyConfigListeners(initialConfig);
+                }
             }, (error) => {
                 console.warn('Erro ao escutar config no Firestore, alternando para cache:', error);
+                notifyConfigListeners(getLocalConfig());
             });
 
             // Listener em tempo real para palpites
@@ -85,9 +96,11 @@ export async function initDatabase() {
                 snapshot.forEach(docSnap => {
                     list.push({ id: docSnap.id, ...docSnap.data() });
                 });
+                localStorage.setItem('bolao_guesses', JSON.stringify(list));
                 notifyGuessListeners(list);
             }, (error) => {
                 console.warn('Erro ao escutar palpites no Firestore, usando fallback local:', error);
+                notifyGuessListeners(getLocalGuesses());
             });
 
             return { useCloud: true };
@@ -184,12 +197,17 @@ export async function saveEventConfig(newConfig) {
         updatedAt: new Date().toISOString()
     };
 
+    // Atualiza local primeiro para feedback instantâneo no aparelho atual
+    localStorage.setItem('bolao_event_settings', JSON.stringify(updated));
+    notifyConfigListeners(updated);
+
     if (useCloud && db) {
-        const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-        await setDoc(doc(db, 'settings', 'event_config'), updated, { merge: true });
-    } else {
-        localStorage.setItem('bolao_event_settings', JSON.stringify(updated));
-        notifyConfigListeners(updated);
+        try {
+            const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            await setDoc(doc(db, 'settings', 'event_config'), updated, { merge: true });
+        } catch (err) {
+            console.warn('Erro ao salvar no Firestore (mantido localmente):', err);
+        }
     }
     return { success: true, config: updated };
 }
@@ -211,17 +229,21 @@ export async function addGuess(guessData) {
     };
 
     if (useCloud && db) {
-        const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-        const docRef = await addDoc(collection(db, 'guesses'), newGuess);
-        return { success: true, id: docRef.id, ...newGuess };
-    } else {
-        const guesses = getLocalGuesses();
-        const id = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-        const itemWithId = { id, ...newGuess };
-        guesses.unshift(itemWithId);
-        saveLocalGuesses(guesses);
-        return { success: true, id, ...newGuess };
+        try {
+            const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            const docRef = await addDoc(collection(db, 'guesses'), newGuess);
+            return { success: true, id: docRef.id, ...newGuess };
+        } catch (err) {
+            console.warn('Falha no Firestore addDoc, usando fallback local:', err);
+        }
     }
+
+    const guesses = getLocalGuesses();
+    const id = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+    const itemWithId = { id, ...newGuess };
+    guesses.unshift(itemWithId);
+    saveLocalGuesses(guesses);
+    return { success: true, id, ...newGuess };
 }
 
 export async function updateGuess(guessId, fields) {

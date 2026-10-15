@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Palpites do Bolão: leitura pública para o placar e envio liberado
+    match /guesses/{guessId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+    
+    // Configurações do evento (cotas, chave Pix, data e nomes dos bebês)
+    match /settings/{settingId} {
+      allow read, write: if true;
+    }
+  }
+}

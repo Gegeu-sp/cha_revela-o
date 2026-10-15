@@ -1,6 +1,6 @@
 // js/app.js - Orquestrador Principal da Aplicação
 
-import { initDatabase, subscribeToGuesses, subscribeToEventConfig, addGuess } from './db.js';
+import { initDatabase, subscribeToGuesses, subscribeToEventConfig, addGuess, isUsingCloud } from './db.js';
 import { initAuth } from './auth.js';
 import { updateStateFromConfig, updateStateFromGuesses, subscribeToState } from './state.js';
 import { updateScoreboard } from './ranking.js';
@@ -51,7 +51,7 @@ function renderPublicView(state) {
     const pixReceiverElements = document.querySelectorAll('.pix-receiver-display');
 
     if (heroBabyNames) {
-        heroBabyNames.innerHTML = `<span class="text-blue-600 font-extrabold">${escapeHtml(boyName)} 💙</span> ou <span class="text-pink-600 font-extrabold">${escapeHtml(girlName)} 💖</span>?`;
+        heroBabyNames.innerHTML = `<span class="text-[#03665A] font-extrabold">${escapeHtml(boyName)} 🌿</span> ou <span class="text-[#3B0069] font-extrabold">${escapeHtml(girlName)} 🌸</span>?`;
     }
 
     if (labelBoyVote) {
@@ -84,6 +84,16 @@ function renderPublicView(state) {
     if (totalPalpitesEl) totalPalpitesEl.textContent = totalConfirmedCount.toString();
     if (valorArrecadadoEl) valorArrecadadoEl.textContent = `R$ ${totalArrecadado.toFixed(2).replace('.', ',')}`;
     if (premioEstimadoEl) premioEstimadoEl.textContent = `R$ ${premioEstimado.toFixed(2).replace('.', ',')}`;
+
+    // Indicador de Sincronização em Nuvem vs Local
+    const cloudStatusEl = document.getElementById('cloud-sync-status');
+    if (cloudStatusEl) {
+        if (isUsingCloud()) {
+            cloudStatusEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> <span class="text-emerald-700 font-bold">Nuvem Conectada (Sincronizado)</span>`;
+        } else {
+            cloudStatusEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> <span class="text-amber-700 font-semibold">Modo Local (Demonstração)</span>`;
+        }
+    }
 
     // Placar da Disputa
     updateScoreboard(state);
@@ -126,16 +136,18 @@ function renderPublicGuessesTable(guesses, boyName, girlName) {
 
     tbody.innerHTML = guesses.map(g => {
         const isBoy = g.gender === 'boy';
-        const badgeColor = isBoy ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700';
-        const babyVoted = isBoy ? `💙 ${boyName}` : `💖 ${girlName}`;
+        const badgeColor = isBoy 
+            ? 'bg-[#CEE1DF] text-[#03665A] border border-[#689D97]/30' 
+            : 'bg-[#BE9ECF]/40 text-[#3B0069] border border-[#8F56AD]/30';
+        const babyVoted = isBoy ? `🌿 ${boyName}` : `🌸 ${girlName}`;
 
         let statusBadge = '';
         if (g.status === 'confirmed') {
-            statusBadge = `<span class="text-emerald-600 font-bold text-xs flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Confirmado</span>`;
+            statusBadge = `<span class="text-[#03665A] font-extrabold text-xs flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Confirmado</span>`;
         } else if (g.status === 'cancelled') {
             statusBadge = `<span class="text-red-500 font-semibold text-xs flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Cancelado</span>`;
         } else {
-            statusBadge = `<span class="text-amber-600 font-semibold text-xs flex items-center gap-1.5 animate-pulse"><i class="fa-solid fa-clock"></i> Aguardando Pix</span>`;
+            statusBadge = `<span class="text-amber-700 font-semibold text-xs flex items-center gap-1.5 animate-pulse"><i class="fa-solid fa-clock text-amber-500"></i> Aguardando Pix</span>`;
         }
 
         const cotas = g.quotasCount || 1;

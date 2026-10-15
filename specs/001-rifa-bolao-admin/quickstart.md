@@ -79,3 +79,19 @@ Este guia define os cenários executáveis de validação de ponta a ponta (E2E)
   3. Salvar alterações.
 - **Resultado Esperado**:
   - O nome é atualizado na tabela e o placar recalcula as cotas adicionais.
+
+### Cenário 7: Validação da Paleta Personalizada e Enquadramento Responsivo
+- **Ação**:
+  1. Acessar a aplicação em viewport mobile (375px) e desktop (1440px).
+  2. Inspecionar o Hero, botões de votação, placar e tabela de palpites.
+- **Resultado Esperado**:
+  - A interface exibe a paleta harmônica com tons violeta (`#3B0069`, `#8F56AD`, `#BE9ECF`) para a Menina e tons esmeralda/menta (`#03665A`, `#689D97`, `#CEE1DF`) para o Menino.
+  - Não há transbordamento horizontal da página em nenhuma largura (320px a 1440px+).
+  - Tabela possui container com rolagem horizontal independente e modais rolam internamente sem cortar o rodapé.
+
+### Cenário 8: Sincronização em Tempo Real Multi-Dispositivo (Cross-Device Sync)
+- **Ação**:
+  1. Abrir o site no Computador A (painel administrativo) e no Smartphone B (página pública).
+  2. No Computador A, alterar o valor da cota ou confirmar um palpite.
+- **Resultado Esperado**:
+  - No Smartphone B, sem recarregar a página, o novo valor da cota e o placar atualizam automaticamente via Firestore em tempo real.

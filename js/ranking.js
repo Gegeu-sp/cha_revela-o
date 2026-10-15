@@ -35,27 +35,27 @@ export function updateScoreboard(state) {
 
     // Estilos de liderança e destaques visuais
     if (cardBoy && cardGirl && leaderStatusEl) {
-        cardBoy.classList.remove('leader-boy', 'border-blue-500');
-        cardGirl.classList.remove('leader-girl', 'border-pink-500');
+        cardBoy.classList.remove('leader-boy', 'border-blue-500', 'border-[#03665A]');
+        cardGirl.classList.remove('leader-girl', 'border-pink-500', 'border-[#8F56AD]');
 
         if (leader === 'boy') {
-            cardBoy.classList.add('leader-boy', 'border-blue-500');
+            cardBoy.classList.add('leader-boy', 'border-[#03665A]');
             leaderStatusEl.innerHTML = `
-                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-extrabold animate-pulse shadow-sm">
-                    <i class="fa-solid fa-crown text-amber-500 text-sm"></i> ${boyName} está na liderança! 💙
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#CEE1DF] text-[#03665A] text-xs font-extrabold animate-pulse shadow-sm">
+                    <i class="fa-solid fa-crown text-amber-500 text-sm"></i> ${boyName} está na liderança! 🌿
                 </span>
             `;
         } else if (leader === 'girl') {
-            cardGirl.classList.add('leader-girl', 'border-pink-500');
+            cardGirl.classList.add('leader-girl', 'border-[#8F56AD]');
             leaderStatusEl.innerHTML = `
-                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-pink-100 text-pink-700 text-xs font-extrabold animate-pulse shadow-sm">
-                    <i class="fa-solid fa-crown text-amber-500 text-sm"></i> ${girlName} está na liderança! 💖
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#BE9ECF]/40 text-[#3B0069] text-xs font-extrabold animate-pulse shadow-sm">
+                    <i class="fa-solid fa-crown text-amber-500 text-sm"></i> ${girlName} está na liderança! 🌸
                 </span>
             `;
         } else {
             leaderStatusEl.innerHTML = `
-                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-100 text-purple-700 text-xs font-extrabold shadow-sm">
-                    <i class="fa-solid fa-scale-balanced text-purple-500"></i> Disputa acirrada: Empate técnico entre ${boyName} e ${girlName}! ✨
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#CEE1DF]/50 text-[#3B0069] text-xs font-extrabold shadow-sm">
+                    <i class="fa-solid fa-scale-balanced text-[#8F56AD]"></i> Disputa acirrada: Empate técnico entre ${boyName} e ${girlName}! ✨
                 </span>
             `;
         }
@@ -80,15 +80,17 @@ function renderTopContributors(topContributors, boyName, girlName) {
     const medals = ['🥇', '🥈', '🥉', '4º', '5º'];
     listEl.innerHTML = topContributors.map((c, index) => {
         const isBoy = c.gender === 'boy';
-        const badgeColor = isBoy ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700';
-        const babyVoted = isBoy ? `💙 ${boyName}` : `💖 ${girlName}`;
+        const badgeColor = isBoy 
+            ? 'bg-[#CEE1DF] text-[#03665A] border border-[#689D97]/30' 
+            : 'bg-[#BE9ECF]/40 text-[#3B0069] border border-[#8F56AD]/30';
+        const babyVoted = isBoy ? `🌿 ${boyName}` : `🌸 ${girlName}`;
         return `
             <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center gap-3">
                     <span class="text-base font-heading font-extrabold text-slate-700 w-6 text-center">${medals[index] || (index + 1)}</span>
                     <div>
                         <div class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-                            ${escapeHtml(c.name)} <span class="text-xs font-medium text-slate-500">(${babyVoted})</span>
+                            ${escapeHtml(c.name)} <span class="text-xs font-semibold text-slate-500">(${babyVoted})</span>
                         </div>
                         <div class="text-[11px] text-slate-400">
                             ${c.totalCotas} cota${c.totalCotas !== 1 ? 's' : ''} adquirida${c.totalCotas !== 1 ? 's' : ''}
@@ -96,7 +98,7 @@ function renderTopContributors(topContributors, boyName, girlName) {
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="text-xs font-extrabold ${badgeColor} px-3 py-1 rounded-full">
+                    <span class="text-xs font-extrabold ${badgeColor} px-3 py-1 rounded-full inline-block">
                         R$ ${Number(c.totalAmount).toFixed(2).replace('.', ',')}
                     </span>
                 </div>
@@ -105,15 +107,15 @@ function renderTopContributors(topContributors, boyName, girlName) {
     }).join('');
 }
 
-// Disparo festivo de confetes (usando canvas-confetti via CDN)
+// Disparo festivo de confetes com a paleta oficial
 export function triggerCelebration() {
     try {
         if (typeof window.confetti === 'function') {
             window.confetti({
-                particleCount: 100,
-                spread: 80,
+                particleCount: 110,
+                spread: 85,
                 origin: { y: 0.6 },
-                colors: ['#3b82f6', '#ec4899', '#f59e0b', '#10b981', '#a855f7']
+                colors: ['#3B0069', '#8F56AD', '#BE9ECF', '#CEE1DF', '#689D97', '#03665A', '#FFD700']
             });
         }
     } catch (e) {

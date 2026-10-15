@@ -5,12 +5,13 @@
  * Pode ser preenchida aqui diretamente ou configurada pelo Administrador na interface.
  */
 export const defaultFirebaseConfig = {
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
+    apiKey: "AIzaSyDiTKlUDX7V9TpjJPx7uvUYGXN_XaBGjIg",
+    authDomain: "rifa-bolao.firebaseapp.com",
+    projectId: "rifa-bolao",
+    storageBucket: "rifa-bolao.firebasestorage.app",
+    messagingSenderId: "192442338206",
+    appId: "1:192442338206:web:cbd35f22d5ecaa5757a48f",
+    measurementId: "G-40R8W9BGEF"
 };
 
 // Verifica se há configuração personalizada salva em localStorage

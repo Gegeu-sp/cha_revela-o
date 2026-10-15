@@ -109,6 +109,20 @@
 
 ---
 
+## Phase 8: Paleta Personalizada, Sincronização em Nuvem e Enquadramento (Novos Requisitos)
+
+**Purpose**: Aplicar a paleta de 6 cores em anexo, habilitar sincronização em tempo real entre dispositivos via Firebase e aperfeiçoar o enquadramento mobile e web.
+
+- [X] T029 Configurar credenciais oficiais do Firebase Web SDK em `js/config.js` e habilitar regras/persistência em nuvem
+- [X] T030 [P] Aplicar a nova paleta de cores (#3B0069, #8F56AD, #BE9ECF, #CEE1DF, #689D97, #03665A) no tema Tailwind e em `css/animations.css`
+- [X] T031 [P] Refinar o enquadramento responsivo em `index.html` (containers limitados, tabela com scroll autocontido, modais e botões com área de toque de 44px)
+- [X] T032 Adicionar badge visual de status de sincronização (Nuvem Ativa / Local) na interface
+- [X] T033 Realizar testes E2E dos cenários 7 e 8 do `quickstart.md`
+- [X] T034 Comitar e sincronizar alterações no repositório GitHub (`git push origin main`)
+- [X] T035 Publicar em produção no Firebase Hosting (`firebase deploy --only hosting`)
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

@@ -74,3 +74,59 @@ Os pais precisam configurar a data prevista de nascimento e os convidados devem 
 
 ### Decision
 Implementar um módulo utilitário de contagem regressiva reativa que aceita datas no formato `YYYY-MM-DD` e atualiza a contagem a cada minuto, exibindo dias, horas e minutos, com mensagem festiva caso a data chegue ou seja ultrapassada.
+
+---
+
+## 5. Nova Paleta de Cores Personalizada (Tons Violeta & Tons Esmeralda/Menta)
+
+### Context & Problem
+O usuário forneceu uma paleta personalizada com 6 cores em anexo para substituir o padrão genérico azul/rosa por um visual sofisticado e marcante.
+
+Cores fornecidas:
+1. `#3B0069` (Roxo Real/Profundo)
+2. `#8F56AD` (Ametista/Violeta Médio)
+3. `#BE9ECF` (Lavanda Suave/Lilás Claro)
+4. `#CEE1DF` (Menta Gelo/Aqua Pálido)
+5. `#689D97` (Verde Sálvia/Teal Médio)
+6. `#03665A` (Esmeralda/Verde Floresta Profundo)
+
+### Decision & Mapping
+- **Lado Menina (Tons Violeta/Lilás)**:
+  - Base / Fundo suave: `#BE9ECF` (tint suave `#FAF5FC`)
+  - Cor Principal / Botões / Destaques: `#8F56AD`
+  - Cor Escura / Textos / Bordas: `#3B0069`
+- **Lado Menino (Tons Menta/Esmeralda)**:
+  - Base / Fundo suave: `#CEE1DF` (tint suave `#F2F9F8`)
+  - Cor Principal / Botões / Destaques: `#689D97`
+  - Cor Escura / Textos / Bordas: `#03665A`
+- **Contraste e Acessibilidade**:
+  - Todos os botões e textos usam combinações de alto contraste conforme WCAG AA (texto branco sobre `#3B0069`, `#8F56AD`, `#03665A` e texto escuro sobre `#CEE1DF`, `#BE9ECF`).
+
+---
+
+## 6. Arquitetura de Sincronização Multi-Dispositivo (Cross-Device Sync)
+
+### Context & Problem
+Quando as configurações eram salvas no computador dos pais, os celulares dos convidados não recebiam a atualização porque o Firebase não estava autenticado com chaves válidas, fazendo o sistema recair apenas em `localStorage` local daquele navegador específico.
+
+### Decision
+1. **Configuração Oficial do Web App**: Integrar o SDK config gerado pelo Firebase CLI no projeto `rifa-bolao`:
+   - `projectId`: `"rifa-bolao"`
+   - `apiKey`: `"AIzaSyDiTKlUDX7V9TpjJPx7uvUYGXN_XaBGjIg"`
+   - `appId`: `"1:192442338206:web:cbd35f22d5ecaa5757a48f"`
+   - `authDomain`: `"rifa-bolao.firebaseapp.com"`
+2. **Listeners Firestore em Tempo Real**: `onSnapshot` nas coleções `settings/event_config` e `guesses` garantem sincronização bidirecional em tempo real.
+3. **Indicador Visual de Sincronização**: Exibição de badge com status da nuvem para os pais terem certeza de que a conexão está ativa.
+
+---
+
+## 7. Enquadramento e Alinhamento Responsivo (Web & Mobile)
+
+### Context & Problem
+O layout precisa de enquadramento perfeito, sem quebras em telas de 320px a 4K e sem rolagem horizontal indesejada.
+
+### Decision
+1. **Limitação de Largura (Container Bound)**: Uso estrito de `max-w-5xl mx-auto px-4 sm:px-6` em todas as seções principais.
+2. **Tabela Responsiva Autocontida**: Tabela com `overflow-x-auto rounded-2xl` e scroll suave.
+3. **Modais Ergonômicos**: `max-h-[90vh] flex flex-col` com rolagem interna para evitar corte de botões no mobile.
+4. **Touch Targets**: Botões e seletores com altura mínima de 44px para facilidade de toque no smartphone.
