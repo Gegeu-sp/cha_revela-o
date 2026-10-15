@@ -1,57 +1,38 @@
-# 🚀 Guia de Publicação no Firebase Hosting (Deixar o Site Online)
+# 🚀 Guia de Publicação no Firebase Hosting & Status do Projeto
 
-Este projeto foi configurado com arquitetura **Zero-Build** e já contém os arquivos [`firebase.json`](firebase.json) e [`.firebaserc`](.firebaserc) prontos para publicação instantânea com certificado SSL (HTTPS gratuito) e CDN global.
+Este projeto está com arquitetura **Zero-Build** e **totalmente publicado e sincronizado em produção**.
 
 ---
 
-## Passo a Passo para Publicar
+## 🌐 Links Oficiais em Produção
 
-### 1. Instalar as Ferramentas do Firebase (caso ainda não tenha)
-Abra o terminal (PowerShell ou Prompt) e execute:
+- **Aplicação Web (Firebase Hosting)**: [https://rifa-bolao.web.app](https://rifa-bolao.web.app)
+- **Painel Firebase Console**: [https://console.firebase.google.com/project/rifa-bolao/overview](https://console.firebase.google.com/project/rifa-bolao/overview)
+- **Repositório GitHub**: [https://github.com/Gegeu-sp/cha_revela-o](https://github.com/Gegeu-sp/cha_revela-o)
+
+---
+
+## ⚡ Serviços Configurados e Ativos
+
+1. **Firebase Web App**: Registrado sob o app ID `1:192442338206:web:cbd35f22d5ecaa5757a48f`.
+2. **Cloud Firestore**: Banco de dados `(default)` criado e com regras de segurança ativas (`firestore.rules`). Sincronização em tempo real multi-dispositivo habilitada.
+3. **Nova Paleta de Cores**:
+   - Menino (Lucca): Deep Teal `#03665A`, Sage `#689D97`, Ice Mint `#CEE1DF`
+   - Menina (Maya): Deep Violet `#3B0069`, Amethyst `#8F56AD`, Soft Lilac `#BE9ECF`
+4. **Enquadramento Responsivo**: Max-width centralizado, modais com `max-h-[90vh]` e scroll interno, tabela responsiva e botões com área de toque mínima de 44px.
+5. **Indicador de Nuvem**: Badge no topo indicando `Nuvem Ativa` com ponto verde pulsante.
+
+---
+
+## 🔄 Como Republicar Alterações Futuras
+
+Sempre que fizer novas modificações no código:
 ```bash
-npm install -g firebase-tools
+# 1. Salvar e enviar para o GitHub
+git add .
+git commit -m "suas alterações"
+git push origin main
+
+# 2. Publicar no Firebase
+firebase deploy
 ```
-*(Ou use diretamente via `npx firebase-tools` se preferir).*
-
----
-
-### 2. Conectar à sua Conta Google / Firebase
-Faça o login seguro no terminal:
-```bash
-firebase login
-```
-Uma janela do navegador será aberta para autorizar o acesso à sua conta Google.
-
----
-
-### 3. Vincular ou Criar o Projeto no Firebase Console
-1. Acesse [https://console.firebase.google.com/](https://console.firebase.google.com/) e clique em **"Adicionar projeto"** (ex: `charevelacao-bolao`).
-2. Se quiser alterar o ID do projeto configurado no arquivo [`.firebaserc`](.firebaserc), edite a linha `"default": "seu-id-do-projeto"`.
-3. Ou simplesmente execute no terminal:
-```bash
-firebase use --add
-```
-e selecione o seu projeto na lista.
-
----
-
-### 4. Fazer o Deploy (Publicar)
-Para subir o site para a internet:
-```bash
-firebase deploy --only hosting
-```
-
-Em poucos segundos, o terminal exibirá a URL pública oficial do seu bolão:
-```text
-✔ Deploy complete!
-Hosting URL: https://seu-projeto.web.app
-```
-
----
-
-## Dica para Sincronização em Tempo Real (Firestore)
-Para que os votos dos convidados em outros celulares sincronizem com o seu celular em tempo real:
-1. No [Firebase Console](https://console.firebase.google.com/), ative o **Firestore Database** em modo de teste ou produção.
-2. Ative o **Firebase Authentication** com o provedor **E-mail/Senha** para o login dos pais.
-3. Copie as chaves do seu Web App no Firebase e cole no arquivo [`js/config.js`](js/config.js) no objeto `defaultFirebaseConfig`.
-4. Execute `firebase deploy --only hosting` novamente!
