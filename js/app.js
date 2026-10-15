@@ -30,9 +30,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderPublicView(state);
     });
 
-    // 4. Configura ouvintes dos formulários e Pix
+    // 4. Configura ouvintes dos formulários, Pix e Menu Mobile
     setupPublicForm();
     setupPixCopyHelper();
+    setupMobileMenu();
 });
 
 function renderPublicView(state) {
@@ -51,7 +52,7 @@ function renderPublicView(state) {
     const pixReceiverElements = document.querySelectorAll('.pix-receiver-display');
 
     if (heroBabyNames) {
-        heroBabyNames.innerHTML = `<span class="text-[#03665A] font-extrabold">${escapeHtml(boyName)} 🌿</span> ou <span class="text-[#3B0069] font-extrabold">${escapeHtml(girlName)} 🌸</span>?`;
+        heroBabyNames.innerHTML = `<span class="text-[#03665A] font-bold truncate max-w-[120px] sm:max-w-none inline-block">${escapeHtml(boyName)}</span> <span class="text-slate-400 font-normal px-0.5">vs</span> <span class="text-[#3B0069] font-bold truncate max-w-[120px] sm:max-w-none inline-block">${escapeHtml(girlName)}</span>`;
     }
 
     if (labelBoyVote) {
@@ -280,6 +281,29 @@ function setupPixCopyHelper() {
                     prompt('Copie a chave Pix:', pixKey);
                 });
             }
+        });
+    });
+}
+
+function setupMobileMenu() {
+    const btn = document.getElementById('btn-mobile-menu');
+    const menu = document.getElementById('mobile-menu');
+    if (!btn || !menu) return;
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+
+    menu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            menu.classList.add('hidden');
         });
     });
 }

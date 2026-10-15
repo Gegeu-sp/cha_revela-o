@@ -76,41 +76,70 @@
 
     <!-- Header Principal com Enquadramento Perfeito -->
     <header class="sticky top-0 z-40 backdrop-blur-md bg-white/95 border-b border-slate-100 shadow-xs transition">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-3 sm:gap-4">
+            <!-- Logo e Nomes dos Bebês -->
+            <a href="#" class="flex items-center gap-2.5 sm:gap-3 shrink-0 group">
                 <div
-                    class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#03665A] via-[#689D97] to-[#8F56AD] flex items-center justify-center text-white shadow-sm shrink-0">
+                    class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#03665A] via-[#689D97] to-[#8F56AD] flex items-center justify-center text-white shadow-sm shrink-0 group-hover:scale-105 transition-transform">
                     <i class="fa-solid fa-baby text-lg"></i>
                 </div>
-                <div>
-                    <h1 class="font-heading font-extrabold text-base sm:text-lg text-slate-800 leading-tight">Bolão do Baby</h1>
-                    <span id="hero-baby-names" class="text-xs text-slate-500 font-semibold flex items-center gap-1.5">
-                        <span class="text-[#03665A] font-bold">Lucca 🌿</span> ou <span
-                            class="text-[#3B0069] font-bold">Maya 🌸</span>?
-                    </span>
+                <div class="flex flex-col min-w-0">
+                    <span class="font-heading font-extrabold text-base sm:text-lg text-slate-800 leading-tight">Bolão do Baby</span>
+                    <div id="hero-baby-names" class="text-xs text-slate-500 font-semibold flex items-center gap-1 whitespace-nowrap overflow-hidden">
+                        <span class="text-[#03665A] font-bold">Lucca 🌿</span>
+                        <span class="text-slate-400 font-normal">vs</span>
+                        <span class="text-[#3B0069] font-bold">Maya 🌸</span>
+                    </div>
                 </div>
-            </div>
+            </a>
 
-            <nav class="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
-                <a href="#como-funciona" class="hover:text-[#8F56AD] transition">Como Funciona</a>
-                <a href="#placar" class="hover:text-[#8F56AD] transition">Placar da Disputa</a>
-                <a href="#pix-section" class="hover:text-[#8F56AD] transition">Pagar com Pix</a>
-                <a href="#palpites" class="hover:text-[#8F56AD] transition">Enviar Palpite</a>
-                <a href="#tabela" class="hover:text-[#8F56AD] transition">Tabela</a>
+            <!-- Navegação Desktop sem quebra de linhas -->
+            <nav class="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold text-slate-600">
+                <a href="#como-funciona" class="px-3 py-1.5 rounded-xl hover:text-[#03665A] hover:bg-[#CEE1DF]/30 transition whitespace-nowrap">Como Funciona</a>
+                <a href="#placar" class="px-3 py-1.5 rounded-xl hover:text-[#03665A] hover:bg-[#CEE1DF]/30 transition whitespace-nowrap">Placar</a>
+                <a href="#pix-section" class="px-3 py-1.5 rounded-xl hover:text-[#03665A] hover:bg-[#CEE1DF]/30 transition whitespace-nowrap">Pagar com Pix</a>
+                <a href="#palpites" class="px-3 py-1.5 rounded-xl hover:text-[#3B0069] hover:bg-[#BE9ECF]/20 transition whitespace-nowrap">Enviar Palpite</a>
+                <a href="#tabela" class="px-3 py-1.5 rounded-xl hover:text-slate-900 hover:bg-slate-100 transition whitespace-nowrap">Tabela</a>
             </nav>
 
-            <div class="flex items-center gap-2">
+            <!-- Ações Direita -->
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <!-- Botão de Acesso Administrativo dos Pais -->
                 <button id="btn-admin-auth"
-                    class="text-xs font-bold px-3 py-2 rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 transition flex items-center gap-1.5 shadow-2xs">
-                    <i class="fa-solid fa-lock text-slate-400"></i> <span>Área dos Pais</span>
+                    class="text-xs font-bold px-3 py-2 rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 transition flex items-center gap-1.5 shadow-2xs shrink-0 whitespace-nowrap">
+                    <i class="fa-solid fa-lock text-slate-400 text-xs"></i> <span class="hidden sm:inline">Área dos Pais</span><span class="sm:hidden">Pais</span>
                 </button>
 
                 <a href="#palpites"
-                    class="bg-gradient-to-r from-[#03665A] via-[#8F56AD] to-[#3B0069] text-white px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-sm hover:opacity-95 transition transform hover:scale-102 active:scale-98">
+                    class="bg-gradient-to-r from-[#03665A] via-[#8F56AD] to-[#3B0069] text-white px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-sm hover:opacity-95 transition transform hover:scale-102 active:scale-98 shrink-0 whitespace-nowrap">
                     Participar
                 </a>
+
+                <!-- Botão Hamburguer para Telas Menores -->
+                <button id="btn-mobile-menu" type="button" aria-label="Abrir menu"
+                    class="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition focus:outline-none">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
             </div>
+        </div>
+
+        <!-- Menu Dropdown Mobile -->
+        <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-100 bg-white/95 backdrop-blur-md px-4 py-3 space-y-1 transition-all">
+            <a href="#como-funciona" class="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-[#CEE1DF]/30 hover:text-[#03665A] transition">
+                <i class="fa-solid fa-circle-question w-5 text-[#689D97]"></i> Como Funciona
+            </a>
+            <a href="#placar" class="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-[#CEE1DF]/30 hover:text-[#03665A] transition">
+                <i class="fa-solid fa-chart-simple w-5 text-[#689D97]"></i> Placar da Disputa
+            </a>
+            <a href="#pix-section" class="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-[#CEE1DF]/30 hover:text-[#03665A] transition">
+                <i class="fa-solid fa-qrcode w-5 text-[#8F56AD]"></i> Pagar com Pix
+            </a>
+            <a href="#palpites" class="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-[#BE9ECF]/25 hover:text-[#3B0069] transition">
+                <i class="fa-solid fa-paper-plane w-5 text-[#8F56AD]"></i> Enviar Palpite
+            </a>
+            <a href="#tabela" class="block px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition">
+                <i class="fa-solid fa-list-check w-5 text-slate-400"></i> Tabela de Palpites
+            </a>
         </div>
     </header>
 
@@ -210,8 +239,54 @@
             </div>
         </section>
 
+        <!-- Seção: Como Funciona o Bolão -->
+        <section id="como-funciona" class="py-12 md:py-16 bg-white border-t border-slate-100">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6">
+                <div class="text-center max-w-xl mx-auto mb-10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-[#03665A] mb-1 block">Passo a Passo</span>
+                    <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-slate-800">Como Funciona o Bolão?</h2>
+                    <p class="text-slate-500 text-sm mt-2">Participe em apenas 3 passos rápidos e concorra ao prêmio do enxoval!</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Passo 1 -->
+                    <div class="bg-gradient-to-b from-[#CEE1DF]/30 via-white to-white p-6 rounded-3xl border border-[#689D97]/25 shadow-xs flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-[#03665A] text-white flex items-center justify-center text-lg font-heading font-black mb-4 shadow-sm">
+                            1
+                        </div>
+                        <h3 class="font-heading font-bold text-lg text-slate-800 mb-2">Escolha seu Time</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Acha que vem Menino ou Menina? Escolha sua torcida e a quantidade de cotas que deseja para aumentar suas chances.
+                        </p>
+                    </div>
+
+                    <!-- Passo 2 -->
+                    <div class="bg-gradient-to-b from-[#BE9ECF]/20 via-white to-white p-6 rounded-3xl border border-[#8F56AD]/25 shadow-xs flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-[#8F56AD] text-white flex items-center justify-center text-lg font-heading font-black mb-4 shadow-sm">
+                            2
+                        </div>
+                        <h3 class="font-heading font-bold text-lg text-slate-800 mb-2">Faça o Pix</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Transfira o valor correspondente às suas cotas direto pelo QR Code ou chave Pix e guarde o comprovante.
+                        </p>
+                    </div>
+
+                    <!-- Passo 3 -->
+                    <div class="bg-gradient-to-b from-[#3B0069]/10 via-white to-white p-6 rounded-3xl border border-[#3B0069]/20 shadow-xs flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-[#3B0069] text-white flex items-center justify-center text-lg font-heading font-black mb-4 shadow-sm">
+                            3
+                        </div>
+                        <h3 class="font-heading font-bold text-lg text-slate-800 mb-2">Confirme e Torça</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Envie seus dados no formulário e mande o comprovante no WhatsApp. Quando o sexo for revelado, os acertadores dividem o prêmio!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Placar Animado da Disputa (Menino vs Menina) -->
-        <section id="placar" class="py-12 md:py-16 bg-white border-y border-slate-100">
+        <section id="placar" class="py-12 md:py-16 bg-slate-50/60 border-y border-slate-100">
             <div class="max-w-5xl mx-auto px-4 sm:px-6">
                 <div class="text-center max-w-xl mx-auto mb-10">
                     <span class="text-xs font-bold uppercase tracking-widest text-[#8F56AD] mb-1 block">Termômetro da
@@ -493,8 +568,8 @@
 
     <!-- Rodapé -->
     <footer class="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-500">
-        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p>Feito por Argeu Rodrigues</p>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="font-medium text-slate-600">Feito com 💖 para o Chá Revelação</p>
             <p class="text-slate-400">© 2026 - Todos os direitos reservados</p>
         </div>
     </footer>

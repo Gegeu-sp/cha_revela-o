@@ -32,12 +32,12 @@ function updateAdminAuthUI(user) {
 
     if (user) {
         if (authBtn) {
-            authBtn.innerHTML = `<i class="fa-solid fa-lock-open text-emerald-500"></i> Painel dos Pais <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">Admin</span>`;
+            authBtn.innerHTML = `<i class="fa-solid fa-lock-open text-emerald-600 text-xs"></i> <span class="hidden sm:inline">Painel</span> <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Admin</span>`;
         }
         if (adminLoginModal) adminLoginModal.classList.add('hidden');
     } else {
         if (authBtn) {
-            authBtn.innerHTML = `<i class="fa-solid fa-lock text-slate-400"></i> Área dos Pais`;
+            authBtn.innerHTML = `<i class="fa-solid fa-lock text-slate-400 text-xs"></i> <span class="hidden sm:inline">Área dos Pais</span><span class="sm:hidden">Pais</span>`;
         }
         if (adminDashboard) adminDashboard.classList.add('hidden');
     }
