@@ -5,6 +5,8 @@ import { getFirebaseConfig, isFirebaseConfigured, defaultEventSettings } from '.
 let db = null;
 let app = null;
 let useCloud = false;
+let cachedConfig = null;
+let cachedGuesses = null;
 
 // Callbacks registrados para sincronização
 const guessListeners = new Set();
@@ -75,32 +77,47 @@ export async function initDatabase() {
             onSnapshot(configRef, (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.data();
-                    localStorage.setItem('bolao_event_settings', JSON.stringify(data));
-                    notifyConfigListeners(data);
+                    cachedConfig = { ...defaultEventSettings, ...data };
+                    localStorage.setItem('bolao_event_settings', JSON.stringify(cachedConfig));
+                    notifyConfigListeners(cachedConfig);
                 } else {
                     // Inicializa o documento no Firestore se for a primeira vez
                     const initialConfig = getLocalConfig();
                     setDoc(configRef, initialConfig, { merge: true }).catch(() => {});
+                    cachedConfig = initialConfig;
                     notifyConfigListeners(initialConfig);
                 }
             }, (error) => {
                 console.warn('Erro ao escutar config no Firestore, alternando para cache:', error);
-                notifyConfigListeners(getLocalConfig());
+                cachedConfig = getLocalConfig();
+                notifyConfigListeners(cachedConfig);
             });
 
             // Listener em tempo real para palpites
             const guessesRef = collection(db, 'guesses');
-            const q = query(guessesRef, orderBy('createdAt', 'desc'));
-            onSnapshot(q, (snapshot) => {
+            onSnapshot(guessesRef, (snapshot) => {
                 const list = [];
                 snapshot.forEach(docSnap => {
                     list.push({ id: docSnap.id, ...docSnap.data() });
                 });
+
+                // Se a coleção estiver vazia no Firestore e houver palpites mock locais, sincroniza para a nuvem
+                if (list.length === 0 && initialMockGuesses.length > 0) {
+                    initialMockGuesses.forEach(g => {
+                        const { id, ...data } = g;
+                        setDoc(doc(db, 'guesses', id), data, { merge: true }).catch(() => {});
+                    });
+                }
+
+                // Ordenação em memória resiliente e segura
+                list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                cachedGuesses = list;
                 localStorage.setItem('bolao_guesses', JSON.stringify(list));
                 notifyGuessListeners(list);
             }, (error) => {
                 console.warn('Erro ao escutar palpites no Firestore, usando fallback local:', error);
-                notifyGuessListeners(getLocalGuesses());
+                cachedGuesses = getLocalGuesses();
+                notifyGuessListeners(cachedGuesses);
             });
 
             return { useCloud: true };
@@ -176,17 +193,15 @@ function notifyConfigListeners(config) {
 
 export function subscribeToGuesses(callback) {
     guessListeners.add(callback);
-    if (!useCloud) {
-        callback(getLocalGuesses());
-    }
+    // Sempre entrega imediatamente o estado disponível (nuvem ou cache local)
+    callback(cachedGuesses || getLocalGuesses());
     return () => guessListeners.delete(callback);
 }
 
 export function subscribeToEventConfig(callback) {
     configListeners.add(callback);
-    if (!useCloud) {
-        callback(getLocalConfig());
-    }
+    // Sempre entrega imediatamente a configuração disponível (nuvem ou cache local)
+    callback(cachedConfig || getLocalConfig());
     return () => configListeners.delete(callback);
 }
 
@@ -197,7 +212,8 @@ export async function saveEventConfig(newConfig) {
         updatedAt: new Date().toISOString()
     };
 
-    // Atualiza local primeiro para feedback instantâneo no aparelho atual
+    // Atualiza local e cache em memória primeiro para feedback instantâneo
+    cachedConfig = updated;
     localStorage.setItem('bolao_event_settings', JSON.stringify(updated));
     notifyConfigListeners(updated);
 
@@ -205,6 +221,7 @@ export async function saveEventConfig(newConfig) {
         try {
             const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
             await setDoc(doc(db, 'settings', 'event_config'), updated, { merge: true });
+            console.log('✅ Configuração salva no Firestore com sucesso!');
         } catch (err) {
             console.warn('Erro ao salvar no Firestore (mantido localmente):', err);
         }
@@ -232,7 +249,12 @@ export async function addGuess(guessData) {
         try {
             const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
             const docRef = await addDoc(collection(db, 'guesses'), newGuess);
-            return { success: true, id: docRef.id, ...newGuess };
+            const item = { id: docRef.id, ...newGuess };
+            const current = getLocalGuesses();
+            current.unshift(item);
+            cachedGuesses = current;
+            saveLocalGuesses(current);
+            return { success: true, ...item };
         } catch (err) {
             console.warn('Falha no Firestore addDoc, usando fallback local:', err);
         }
@@ -242,21 +264,28 @@ export async function addGuess(guessData) {
     const id = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
     const itemWithId = { id, ...newGuess };
     guesses.unshift(itemWithId);
+    cachedGuesses = guesses;
     saveLocalGuesses(guesses);
     return { success: true, id, ...newGuess };
 }
 
 export async function updateGuess(guessId, fields) {
     if (useCloud && db) {
-        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-        await updateDoc(doc(db, 'guesses', guessId), fields);
-    } else {
-        const guesses = getLocalGuesses();
-        const index = guesses.findIndex(g => g.id === guessId);
-        if (index !== -1) {
-            guesses[index] = { ...guesses[index], ...fields };
-            saveLocalGuesses(guesses);
+        try {
+            const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            // Usa setDoc com merge para atualizar com segurança até registros pré-existentes ou criados offline
+            await setDoc(doc(db, 'guesses', guessId), fields, { merge: true });
+        } catch (err) {
+            console.warn('Erro ao atualizar no Firestore:', err);
         }
+    }
+
+    const guesses = getLocalGuesses();
+    const index = guesses.findIndex(g => g.id === guessId);
+    if (index !== -1) {
+        guesses[index] = { ...guesses[index], ...fields };
+        cachedGuesses = guesses;
+        saveLocalGuesses(guesses);
     }
     return { success: true };
 }
