@@ -1,9 +1,9 @@
 // js/admin.js - Controlador do Painel Administrativo dos Pais
 
-import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated } from './auth.js?v=2.1';
-import { updateGuess, deleteGuess, addGuess, saveEventConfig, resetAllGuesses } from './db.js?v=2.1';
-import { subscribeToState } from './state.js?v=2.1';
-import { triggerCelebration } from './ranking.js?v=2.1';
+import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated } from './auth.js?v=2.2';
+import { updateGuess, deleteGuess, addGuess, saveEventConfig, resetAllGuesses } from './db.js?v=2.2';
+import { subscribeToState } from './state.js?v=2.2';
+import { triggerCelebration } from './ranking.js?v=2.2';
 
 let currentState = null;
 let currentFilter = 'all'; // 'all' | 'pending' | 'confirmed'

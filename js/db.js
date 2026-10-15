@@ -12,51 +12,8 @@ let cachedGuesses = null;
 const guessListeners = new Set();
 const configListeners = new Set();
 
-// Mock inicial de palpites caso o armazenamento local esteja zerado
-const initialMockGuesses = [
-    {
-        id: "mock_1",
-        guestName: "Tia Carla",
-        whatsapp: "(11) 98765-4321",
-        gender: "girl",
-        quotasCount: 2,
-        unitPrice: 15.00,
-        totalAmount: 30.00,
-        status: "confirmed",
-        isManual: false,
-        notes: "Comprovante enviado no WhatsApp",
-        createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-        confirmedAt: new Date(Date.now() - 3600000 * 20).toISOString()
-    },
-    {
-        id: "mock_2",
-        guestName: "Tio João",
-        whatsapp: "(11) 99876-5432",
-        gender: "boy",
-        quotasCount: 1,
-        unitPrice: 15.00,
-        totalAmount: 15.00,
-        status: "confirmed",
-        isManual: false,
-        notes: "Pix recebido",
-        createdAt: new Date(Date.now() - 3600000 * 18).toISOString(),
-        confirmedAt: new Date(Date.now() - 3600000 * 15).toISOString()
-    },
-    {
-        id: "mock_3",
-        guestName: "Vovó Helena",
-        whatsapp: "(11) 91234-5678",
-        gender: "girl",
-        quotasCount: 3,
-        unitPrice: 15.00,
-        totalAmount: 45.00,
-        status: "confirmed",
-        isManual: true,
-        notes: "Entregue em mãos",
-        createdAt: new Date(Date.now() - 3600000 * 10).toISOString(),
-        confirmedAt: new Date(Date.now() - 3600000 * 9).toISOString()
-    }
-];
+// Inicialização limpa: lista vazia por padrão para o Bolão começar do zero
+const initialMockGuesses = [];
 
 export async function initDatabase() {
     if (isFirebaseConfigured()) {
@@ -93,7 +50,7 @@ export async function initDatabase() {
                 notifyConfigListeners(cachedConfig);
             });
 
-            // Listener em tempo real para palpites
+            // Listener em tempo real para palpites (Multi-dispositivo em tempo real)
             const guessesRef = collection(db, 'guesses');
             onSnapshot(guessesRef, (snapshot) => {
                 const list = [];
@@ -101,15 +58,7 @@ export async function initDatabase() {
                     list.push({ id: docSnap.id, ...docSnap.data() });
                 });
 
-                // Se a coleção estiver vazia no Firestore e houver palpites mock locais, sincroniza para a nuvem
-                if (list.length === 0 && initialMockGuesses.length > 0) {
-                    initialMockGuesses.forEach(g => {
-                        const { id, ...data } = g;
-                        setDoc(doc(db, 'guesses', id), data, { merge: true }).catch(() => {});
-                    });
-                }
-
-                // Ordenação em memória resiliente e segura
+                // Ordenação em memória resiliente e segura (mais recentes primeiro)
                 list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
                 cachedGuesses = list;
                 localStorage.setItem('bolao_guesses', JSON.stringify(list));
@@ -140,7 +89,7 @@ function initLocalFallback() {
         localStorage.setItem('bolao_event_settings', JSON.stringify(defaultEventSettings));
     }
     if (!localStorage.getItem('bolao_guesses')) {
-        localStorage.setItem('bolao_guesses', JSON.stringify(initialMockGuesses));
+        localStorage.setItem('bolao_guesses', JSON.stringify([]));
     }
 
     // Escuta alterações entre abas diferentes no mesmo navegador
@@ -291,29 +240,44 @@ export async function updateGuess(guessId, fields) {
 }
 
 export async function deleteGuess(guessId) {
+    // 1. Atualiza cache em memória e localStorage imediatamente
+    const guesses = getLocalGuesses().filter(g => g.id !== guessId);
+    cachedGuesses = guesses;
+    saveLocalGuesses(guesses);
+
+    // 2. Remove do Firestore para sincronizar com todos os demais dispositivos
     if (useCloud && db) {
-        const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-        await deleteDoc(doc(db, 'guesses', guessId));
-    } else {
-        const guesses = getLocalGuesses().filter(g => g.id !== guessId);
-        saveLocalGuesses(guesses);
+        try {
+            const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            await deleteDoc(doc(db, 'guesses', guessId));
+        } catch (err) {
+            console.warn('Erro ao deletar palpite no Firestore:', err);
+        }
     }
     return { success: true };
 }
 
-// Reiniciar o Bolão (Zerar todos os palpites para começar do zero)
+// Reiniciar o Bolão (Zerar todos os palpites para começar do zero em todos os dispositivos)
 export async function resetAllGuesses() {
+    // 1. Limpa cache local e localStorage imediatamente
+    cachedGuesses = [];
+    localStorage.setItem('bolao_guesses', JSON.stringify([]));
+    notifyGuessListeners([]);
+
+    // 2. Se a nuvem estiver ativa, apaga todos os documentos da coleção guesses no Firestore
     if (useCloud && db) {
-        const { collection, getDocs, deleteDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-        const snap = await getDocs(collection(db, 'guesses'));
-        const deletePromises = [];
-        snap.forEach(d => {
-            deletePromises.push(deleteDoc(doc(db, 'guesses', d.id)));
-        });
-        await Promise.all(deletePromises);
-        notifyGuessListeners([]);
-    } else {
-        saveLocalGuesses([]);
+        try {
+            const { collection, getDocs, deleteDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            const snap = await getDocs(collection(db, 'guesses'));
+            const deletePromises = [];
+            snap.forEach(d => {
+                deletePromises.push(deleteDoc(doc(db, 'guesses', d.id)));
+            });
+            await Promise.all(deletePromises);
+            console.log('✅ Todos os palpites foram apagados do Firestore com sucesso!');
+        } catch (err) {
+            console.error('Erro ao deletar palpites no Firestore:', err);
+        }
     }
     return { success: true };
 }

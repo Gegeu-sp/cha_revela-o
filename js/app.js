@@ -1,11 +1,11 @@
 // js/app.js - Orquestrador Principal da Aplicação
 
-import { initDatabase, subscribeToGuesses, subscribeToEventConfig, addGuess, isUsingCloud } from './db.js?v=2.1';
-import { initAuth } from './auth.js?v=2.1';
-import { updateStateFromConfig, updateStateFromGuesses, subscribeToState } from './state.js?v=2.1';
-import { updateScoreboard } from './ranking.js?v=2.1';
-import { initCountdown } from './countdown.js?v=2.1';
-import { initAdminController, showToast } from './admin.js?v=2.1';
+import { initDatabase, subscribeToGuesses, subscribeToEventConfig, addGuess, isUsingCloud } from './db.js?v=2.2';
+import { initAuth } from './auth.js?v=2.2';
+import { updateStateFromConfig, updateStateFromGuesses, subscribeToState } from './state.js?v=2.2';
+import { updateScoreboard } from './ranking.js?v=2.2';
+import { initCountdown } from './countdown.js?v=2.2';
+import { initAdminController, showToast } from './admin.js?v=2.2';
 
 let latestState = null;
 
