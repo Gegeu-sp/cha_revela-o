@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bolão de Chá Revelação - Menino ou Menina? 🍼✨</title>
+    <title>Qual é o seu palpite para o nosso bebê? - Bolão de Chá Revelação 🍼✨</title>
     <meta name="description"
-        content="Participe do nosso Bolão e Rifa de Chá Revelação! Dê seu palpite, concorra a prêmios e ajude no enxoval do bebê.">
+        content="Qual é o seu palpite para o nosso bebê? Participe do nosso Bolão e Rifa de Chá Revelação, concorra a prêmios e ajude no enxoval!">
+    <meta name="author" content="Argeu Rodrigues">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -160,7 +161,7 @@
 
                 <h2 id="hero-title"
                     class="font-heading text-3xl sm:text-5xl md:text-6xl font-black text-slate-800 tracking-tight mb-4 leading-tight">
-                    Qual será o palpite do <span class="text-palette-gradient">século?</span>
+                    Qual é o seu palpite para o <span class="text-palette-gradient">nosso bebê?</span>
                 </h2>
 
                 <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-8 leading-relaxed">
@@ -373,41 +374,107 @@
         </section>
 
         <!-- Seção de Pagamento Pix com QR Code Dedicado -->
-        <section id="pix-section" class="py-12 md:py-16 bg-slate-50/70 border-b border-slate-100">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6">
-                <div class="text-center max-w-xl mx-auto mb-8">
-                    <span class="text-xs font-bold uppercase tracking-widest text-[#03665A] mb-1 block">Pagamento
-                        Simples & Rápido</span>
-                    <h2 class="font-heading text-3xl font-extrabold text-slate-800">Pague com Pix</h2>
-                    <p class="text-slate-500 mt-2 text-sm">Escaneie o QR Code abaixo com o app do seu banco ou copie a
-                        chave Pix!</p>
+        <section id="pix-section" class="py-12 md:py-16 bg-gradient-to-b from-slate-50/80 via-white to-slate-50/80 border-b border-slate-100">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6">
+                <div class="text-center max-w-2xl mx-auto mb-10">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#CEE1DF] text-[#03665A] mb-3 shadow-2xs">
+                        <i class="fa-solid fa-qrcode text-sm"></i> Pagamento Instantâneo via Pix
+                    </span>
+                    <h2 class="font-heading text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight">Pague com Pix</h2>
+                    <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                        Abra o aplicativo do seu banco e escaneie o QR Code abaixo para pagar, ou use o Pix Copia e Cola direto no seu smartphone.
+                    </p>
                 </div>
 
-                <div class="max-w-md mx-auto bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md text-center">
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 inline-block mb-5 shadow-inner">
-                        <img id="pix-qrcode-img"
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=charevelacao@email.com"
-                            alt="QR Code Pix" class="w-48 h-48 mx-auto rounded-xl">
-                    </div>
+                <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xl overflow-hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+                        <!-- Coluna do QR Code (Esquerda / Topo) -->
+                        <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col items-center justify-center text-center bg-slate-50/50">
+                            <div class="relative group cursor-pointer" id="qr-container-trigger" title="Clique para ampliar o QR Code">
+                                <div class="bg-white p-4 sm:p-5 rounded-2xl border-2 border-slate-200 shadow-md inline-block transition-transform duration-300 group-hover:scale-102 group-hover:shadow-lg">
+                                    <img id="pix-qrcode-img"
+                                        src="assets/pix-qrcode.png"
+                                        alt="QR Code Pix Oficial InfinitePay" 
+                                        class="w-56 h-56 sm:w-64 sm:h-64 mx-auto rounded-xl object-contain">
+                                </div>
+                                <div class="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5 backdrop-blur-2xs m-4 sm:m-5">
+                                    <i class="fa-solid fa-expand text-base"></i> Clique para Ampliar
+                                </div>
+                            </div>
 
-                    <div class="space-y-3 mb-6">
-                        <div class="text-xs font-bold uppercase text-slate-400">Chave Pix Oficial</div>
-                        <div
-                            class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-2">
-                            <span
-                                class="font-mono text-sm font-bold text-slate-800 truncate select-all pix-key-display">charevelacao@email.com</span>
-                            <button
-                                class="btn-copy-pix px-3 py-1.5 bg-[#03665A] hover:bg-[#02423A] text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs shrink-0">
-                                <i class="fa-regular fa-copy"></i> Copiar Chave
-                            </button>
+                            <div class="mt-4 flex items-center gap-3">
+                                <button type="button" id="btn-expand-qr" class="text-xs font-bold text-[#03665A] hover:text-[#02423A] bg-[#CEE1DF]/50 hover:bg-[#CEE1DF] px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-expand"></i> Ampliar QR Code
+                                </button>
+                                <a href="assets/pix-qrcode.png" download="pix-cha-revelacao-argeu.png" class="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-download"></i> Baixar Imagem
+                                </a>
+                            </div>
+                            <span class="text-[11px] text-slate-400 mt-2 block">
+                                <i class="fa-solid fa-mobile-screen mr-1"></i> Aponte a câmera do aplicativo do seu banco
+                            </span>
                         </div>
-                        <div class="text-xs text-slate-500">
-                            Titular: <strong class="text-slate-700 pix-receiver-display">Mamãe & Papai</strong>
-                        </div>
-                    </div>
 
-                    <div class="text-[11px] text-slate-400">
-                        Após o pagamento, preencha o formulário logo abaixo para registrar seu voto oficial!
+                        <!-- Coluna de Informações e Copia e Cola (Direita) -->
+                        <div class="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-6">
+                            <!-- Cabeçalho do Beneficiário -->
+                            <div class="border-b border-slate-100 pb-4">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Transferir Pix para:</span>
+                                <h3 class="font-heading font-extrabold text-xl sm:text-2xl text-slate-800 pix-receiver-display">
+                                    ARGEU RODRIGUES PINTO FIL
+                                </h3>
+                                <div class="flex flex-wrap items-center gap-2 mt-2">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <i class="fa-solid fa-shield-halved text-emerald-600 text-[10px]"></i> InfinitePay Oficial
+                                    </span>
+                                    <span class="text-xs text-slate-500 flex items-center gap-1">
+                                        <i class="fa-solid fa-location-dot text-slate-400 text-[10px]"></i> <span id="pix-city-display">São Paulo - SP</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Opção 1: Pix Copia e Cola (Destaque para Celular) -->
+                            <div class="space-y-2 bg-[#F9FBFB] p-4 sm:p-5 rounded-2xl border border-slate-200/80">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold uppercase text-slate-700 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-bolt text-amber-500"></i> Pix Copia e Cola (No Celular)
+                                    </span>
+                                    <span class="text-[10px] font-semibold text-slate-400">Código BR Code</span>
+                                </div>
+                                <p class="text-xs text-slate-500">
+                                    Se estiver acessando pelo celular, copie o código completo abaixo e cole no seu app bancário:
+                                </p>
+                                <div class="p-2.5 bg-white rounded-xl border border-slate-200 text-xs font-mono text-slate-600 break-all select-all line-clamp-2 max-h-14 overflow-hidden" id="pix-copia-cola-text">
+                                    00020101021126490014BR.GOV.BCB.PIX0127argeu-rodrigues-dxm@jim.com5204000053039865802BR5925ARGEU RODRIGUES PINTO FIL6009SAO PAULO62070503***63040836
+                                </div>
+                                <button type="button"
+                                    class="btn-copy-copia-cola w-full py-3 px-4 bg-gradient-to-r from-[#03665A] via-[#689D97] to-[#03665A] hover:opacity-95 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 shadow-md transform active:scale-98">
+                                    <i class="fa-regular fa-copy text-base"></i> Copiar Código Pix Copia e Cola
+                                </button>
+                            </div>
+
+                            <!-- Opção 2: Chave Pix (E-mail) -->
+                            <div class="space-y-2">
+                                <span class="text-xs font-bold uppercase text-slate-500 block">
+                                    Ou transfira pela Chave Pix (E-mail)
+                                </span>
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-2">
+                                    <span class="font-mono text-sm font-bold text-slate-800 truncate select-all pix-key-display">
+                                        argeu-rodrigues-dxm@jim.com
+                                    </span>
+                                    <button type="button"
+                                        class="btn-copy-pix px-3.5 py-1.5 bg-[#8F56AD] hover:bg-[#3B0069] text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs shrink-0">
+                                        <i class="fa-regular fa-copy"></i> Copiar Chave
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Instrução de 3 passos -->
+                            <div class="pt-2 text-xs text-slate-500 border-t border-slate-100 flex items-center gap-2">
+                                <span class="w-5 h-5 rounded-full bg-[#03665A] text-white text-[10px] font-bold flex items-center justify-center shrink-0">✓</span>
+                                <span>Após realizar o Pix, preencha o formulário abaixo para registrar seu voto oficial!</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -489,16 +556,18 @@
                         </div>
 
                         <!-- Caixa de Auxílio Pix -->
-                        <div class="bg-amber-50/90 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
-                            <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-1"></i>
-                            <div class="text-xs text-amber-900 leading-relaxed">
-                                <span class="font-bold block mb-1">Pagamento via Pix:</span>
+                        <div class="bg-emerald-50/90 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-1"></i>
+                            <div class="text-xs text-emerald-950 leading-relaxed">
+                                <span class="font-bold block mb-1">Pagamento via Pix Oficial:</span>
                                 Chave Pix: <strong
-                                    class="select-all font-mono pix-key-display">charevelacao@email.com</strong>
-                                (Titular: <span class="pix-receiver-display">Mamãe & Papai</span>).
+                                    class="select-all font-mono pix-key-display">argeu-rodrigues-dxm@jim.com</strong>
+                                (Titular: <span class="pix-receiver-display">ARGEU RODRIGUES PINTO FIL</span>).
                                 <button type="button"
                                     class="btn-copy-pix underline font-bold ml-1 text-[#03665A] hover:text-black">Copiar
-                                    Chave</button>.
+                                    Chave</button> ou 
+                                <button type="button"
+                                    class="btn-copy-copia-cola underline font-bold text-[#8F56AD] hover:text-black">Copiar Código Pix</button>.
                             </div>
                         </div>
 
@@ -569,7 +638,14 @@
     <!-- Rodapé -->
     <footer class="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p class="font-medium text-slate-600">Feito com 💖 para o Chá Revelação</p>
+            <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+                <span class="font-medium text-slate-600">Feito com 💖 para o Chá Revelação</span>
+                <span class="hidden sm:inline text-slate-300">•</span>
+                <span class="inline-flex items-center gap-1.5 font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
+                    <i class="fa-solid fa-code text-[#03665A]"></i>
+                    Criador e Autor: <strong class="text-slate-900 font-bold">Argeu Rodrigues</strong>
+                </span>
+            </div>
             <p class="text-slate-400">© 2026 - Todos os direitos reservados</p>
         </div>
     </footer>
@@ -611,15 +687,6 @@
                         class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 focus:outline-none text-sm">
                 </div>
 
-                <div
-                    class="p-3 rounded-xl bg-purple-50 border border-purple-100 text-[11px] text-purple-900 leading-relaxed flex items-center justify-between">
-                    <div>
-                        <i class="fa-solid fa-key text-[#8F56AD] mr-1"></i>
-                        <span>Senha de Acesso dos Pais:</span>
-                        <strong class="font-mono bg-white px-2 py-0.5 rounded border border-purple-200 ml-1 select-all">admin123</strong>
-                    </div>
-                </div>
-
                 <button type="submit"
                     class="w-full bg-slate-900 text-white font-heading font-semibold py-3 rounded-xl shadow hover:bg-slate-800 transition flex items-center justify-center gap-2 text-sm">
                     <i class="fa-solid fa-right-to-bracket"></i> Entrar no Painel
@@ -653,6 +720,10 @@
                 </div>
 
                 <div class="flex items-center gap-2">
+                    <button id="btn-quick-raffle"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#03665A] to-[#8F56AD] hover:opacity-90 shadow-2xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-gift"></i> <span class="hidden sm:inline">Sorteio</span>
+                    </button>
                     <span id="admin-cloud-sync-badge"
                         class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#CEE1DF] text-[#03665A] border border-[#689D97]/30">
                         <i class="fa-solid fa-cloud"></i> Firebase Nuvem
@@ -681,6 +752,10 @@
                 <button data-tab="manual"
                     class="admin-tab-btn px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition">
                     <i class="fa-solid fa-user-plus mr-1.5"></i> Adicionar Manual
+                </button>
+                <button data-tab="sorteio"
+                    class="admin-tab-btn px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-gift text-[#8F56AD]"></i> Sorteio do Bolão
                 </button>
             </div>
 
@@ -776,14 +851,14 @@
                                     <div>
                                         <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
                                             for="setting-pix-key">Chave Pix de Pagamento</label>
-                                        <input type="text" id="setting-pix-key" required placeholder="sua-chave@pix.com"
+                                        <input type="text" id="setting-pix-key" required placeholder="argeu-rodrigues-dxm@jim.com"
                                             class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#8F56AD] focus:outline-none text-sm font-mono">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
                                             for="setting-pix-receiver">Nome do Titular do Pix</label>
                                         <input type="text" id="setting-pix-receiver" required
-                                            placeholder="Ex: Mariana & Lucas"
+                                            placeholder="ARGEU RODRIGUES PINTO FIL"
                                             class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#8F56AD] focus:outline-none text-sm">
                                     </div>
                                 </div>
@@ -876,6 +951,144 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- ABA 4: Sorteio da Rifa e Revelação do Ganhador -->
+                <div id="admin-tab-sorteio" class="admin-tab-pane hidden">
+                    <div class="space-y-6">
+                        <!-- Topo informativo do Sorteio -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div>
+                                <h4 class="font-heading font-extrabold text-xl text-slate-800 flex items-center gap-2">
+                                    <span class="text-2xl">🎉</span> Sorteio Oficial do Bolão
+                                </h4>
+                                <span class="text-xs text-slate-500">Urna ponderada: cada cota confirmada equivale a 1 bilhete com amostragem aleatória justa.</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                                <span>Urna Atual:</span>
+                                <span id="raffle-eligible-summary" class="text-[#03665A] font-black">0 cotas (0 participantes)</span>
+                            </div>
+                        </div>
+
+                        <!-- Painel de Configuração da Urna -->
+                        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-700 mb-1" for="raffle-mode-select">
+                                    Modalidade do Sorteio
+                                </label>
+                                <select id="raffle-mode-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-[#8F56AD] focus:outline-none bg-white">
+                                    <option value="all">🎯 Todos os Confirmados (Geral)</option>
+                                    <option value="correct">🏆 Apenas Acertadores do Sexo</option>
+                                </select>
+                            </div>
+
+                            <div id="raffle-gender-container" class="hidden">
+                                <label class="block text-xs font-bold uppercase text-slate-700 mb-1" for="raffle-target-gender">
+                                    Sexo Revelado do Bebê
+                                </label>
+                                <select id="raffle-target-gender" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-[#8F56AD] focus:outline-none bg-white">
+                                    <option value="boy">🌿 Menino</option>
+                                    <option value="girl">🌸 Menina</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-700 mb-1" for="raffle-prize-title">
+                                    Descrição da Premiação
+                                </label>
+                                <input type="text" id="raffle-prize-title" value="Prêmio Principal do Bolão" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#8F56AD] focus:outline-none bg-white">
+                            </div>
+
+                            <div class="flex items-center gap-2 pt-2 md:col-span-3">
+                                <input type="checkbox" id="raffle-exclude-previous" checked class="w-4 h-4 text-[#8F56AD] rounded focus:ring-0 cursor-pointer">
+                                <label for="raffle-exclude-previous" class="text-xs text-slate-600 font-semibold cursor-pointer select-none">
+                                    Excluir ganhadores já premiados nos sorteios anteriores
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Arena de Sorteio / Roleta Animada -->
+                        <div class="bg-gradient-to-b from-[#CEE1DF]/20 via-white to-[#BE9ECF]/15 border-2 border-[#BE9ECF]/40 rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden shadow-xs">
+                            <span class="inline-block text-[11px] font-black tracking-widest uppercase bg-white px-3 py-1 rounded-full text-[#3B0069] border border-[#BE9ECF]/40 mb-3 shadow-2xs">
+                                🎲 Urna Oficial da Rifa
+                            </span>
+
+                            <!-- Visor do Nome com Efeito de Suspense -->
+                            <div class="my-4 min-h-[90px] flex items-center justify-center">
+                                <div id="raffle-display-box" class="w-full max-w-md mx-auto py-4 px-6 rounded-2xl bg-white border-2 border-slate-200 shadow-sm transition-all duration-150">
+                                    <span id="raffle-display-name" class="font-heading font-black text-2xl sm:text-3xl text-slate-800 tracking-tight block truncate">
+                                        Pronto para Sortear!
+                                    </span>
+                                    <span id="raffle-display-detail" class="text-xs font-semibold text-slate-400 mt-1 block">
+                                        Clique no botão abaixo para girar a urna
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Botão Principal de Disparo do Sorteio -->
+                            <div class="flex flex-wrap items-center justify-center gap-3 mt-4">
+                                <button id="btn-run-raffle" class="bg-gradient-to-r from-[#03665A] via-[#8F56AD] to-[#3B0069] text-white font-heading font-extrabold px-8 py-4 rounded-2xl shadow-md hover:opacity-95 transition transform active:scale-98 text-base sm:text-lg flex items-center gap-2">
+                                    <i class="fa-solid fa-dice text-xl text-[#CEE1DF]"></i>
+                                    <span>Sortear Agora!</span>
+                                </button>
+                            </div>
+
+                            <!-- Card de Celebração do Vencedor (Oculto até o sorteio terminar) -->
+                            <div id="raffle-winner-card" class="hidden mt-6 p-6 rounded-3xl bg-white border-2 border-amber-300 shadow-xl max-w-lg mx-auto text-center winner-card-highlight animate-winner-reveal">
+                                <div class="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-white flex items-center justify-center text-2xl shadow-md mb-3">
+                                    <i class="fa-solid fa-trophy"></i>
+                                </div>
+                                <span class="text-xs font-black uppercase tracking-wider text-amber-700 block mb-1">🎉 GANHADOR(A) SORTEADO(A)!</span>
+                                <h3 id="raffle-winner-name" class="font-heading font-black text-2xl sm:text-3xl text-slate-900 leading-tight mb-2">
+                                    --
+                                </h3>
+                                <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-600 mb-4">
+                                    <span id="raffle-winner-gender" class="px-2.5 py-1 rounded-full bg-slate-100">--</span>
+                                    <span id="raffle-winner-quotas" class="px-2.5 py-1 rounded-full bg-slate-100">--</span>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
+                                    <a id="raffle-winner-whatsapp-btn" href="#" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#03665A] hover:bg-[#02423A] text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-xs transition transform hover:scale-102">
+                                        <i class="fa-brands fa-whatsapp text-base"></i>
+                                        <span>Parabenizar no WhatsApp</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Histórico e Auditoria dos Sorteios Realizados -->
+                        <div class="space-y-3 pt-2">
+                            <div class="flex items-center justify-between">
+                                <h5 class="font-heading font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                                    <i class="fa-solid fa-clock-rotate-left text-[#8F56AD]"></i> Histórico de Vencedores Sorteados
+                                </h5>
+                                <button id="btn-reset-raffle-history" class="text-[11px] font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">
+                                    <i class="fa-solid fa-trash mr-1"></i> Zerar Histórico
+                                </button>
+                            </div>
+
+                            <div class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-2.5 px-3">#</th>
+                                            <th class="py-2.5 px-3">Ganhador(a)</th>
+                                            <th class="py-2.5 px-3">Palpite</th>
+                                            <th class="py-2.5 px-3 text-center">Cotas</th>
+                                            <th class="py-2.5 px-3">Modalidade</th>
+                                            <th class="py-2.5 px-3">Data/Hora</th>
+                                            <th class="py-2.5 px-3 text-right">Contato</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="raffle-history-tbody" class="divide-y divide-slate-100 text-slate-700">
+                                        <tr>
+                                            <td colspan="7" class="py-4 text-center text-slate-400">Nenhum sorteio realizado ainda.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -961,8 +1174,45 @@
         </div>
     </div>
 
+    <!-- Modal para Ampliar o QR Code Pix Oficial -->
+    <div id="modal-qr-expand" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative animate-pop-in border border-slate-100">
+            <button type="button" id="btn-close-qr-modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#CEE1DF] text-[#03665A] mb-2">
+                <i class="fa-solid fa-qrcode"></i> QR Code Pix Oficial
+            </div>
+            <h4 class="font-heading font-extrabold text-slate-800 text-lg mb-1 pix-receiver-display">
+                ARGEU RODRIGUES PINTO FIL
+            </h4>
+            <div class="text-xs text-slate-500 mb-3 flex items-center justify-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> InfinitePay &bull; Transferência Instantânea
+            </div>
+            <div class="bg-white p-3 rounded-2xl border-2 border-slate-200 inline-block mb-3 shadow-inner">
+                <img src="assets/pix-qrcode.png" alt="QR Code Pix Oficial InfinitePay" class="w-64 h-64 mx-auto rounded-xl object-contain">
+            </div>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                Abra o aplicativo do seu banco (Nubank, Itaú, Bradesco, etc.) e aponte a câmera para pagar com Pix.
+            </p>
+            <div class="flex flex-col gap-2">
+                <button type="button" class="btn-copy-copia-cola w-full py-2.5 px-4 bg-gradient-to-r from-[#03665A] via-[#689D97] to-[#03665A] hover:opacity-95 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-md">
+                    <i class="fa-regular fa-copy"></i> Copiar Código Pix Copia e Cola
+                </button>
+                <div class="flex gap-2">
+                    <button type="button" class="btn-copy-pix flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-regular fa-copy"></i> Copiar Chave
+                    </button>
+                    <a href="assets/pix-qrcode.png" download="pix-cha-revelacao-argeu.png" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Baixar Imagem
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script Principal como ES6 Module -->
-    <script type="module" src="js/app.js?v=2.2"></script>
+    <script type="module" src="js/app.js?v=2.4"></script>
 </body>
 
 </html>

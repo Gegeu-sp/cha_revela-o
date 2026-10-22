@@ -4,6 +4,7 @@ import { defaultEventSettings } from './config.js';
 
 let currentConfig = { ...defaultEventSettings };
 let allGuesses = [];
+let allDraws = [];
 const stateListeners = new Set();
 
 export function updateStateFromConfig(newConfig) {
@@ -13,6 +14,11 @@ export function updateStateFromConfig(newConfig) {
 
 export function updateStateFromGuesses(guesses) {
     allGuesses = Array.isArray(guesses) ? guesses : [];
+    emitStateChange();
+}
+
+export function updateStateFromDraws(draws) {
+    allDraws = Array.isArray(draws) ? draws : [];
     emitStateChange();
 }
 
@@ -94,6 +100,9 @@ export function getComputedState() {
         boyPercent,
         girlPercent,
         leader,
-        topContributors
+        topContributors,
+        draws: allDraws,
+        totalDrawsCount: allDraws.length,
+        latestWinner: allDraws[0] || null
     };
 }

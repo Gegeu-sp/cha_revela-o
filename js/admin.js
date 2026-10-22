@@ -1,12 +1,15 @@
 // js/admin.js - Controlador do Painel Administrativo dos Pais
 
-import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated } from './auth.js?v=2.2';
-import { updateGuess, deleteGuess, addGuess, saveEventConfig, resetAllGuesses } from './db.js?v=2.2';
-import { subscribeToState } from './state.js?v=2.2';
-import { triggerCelebration } from './ranking.js?v=2.2';
+import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated } from './auth.js?v=2.3';
+import { updateGuess, deleteGuess, addGuess, saveEventConfig, resetAllGuesses, saveDraw, getDrawHistory, resetDrawHistory } from './db.js?v=2.3';
+import { subscribeToState } from './state.js?v=2.3';
+import { triggerCelebration } from './ranking.js?v=2.3';
+import { buildRaffleTickets, selectWinningTicket, createWhatsAppCelebrationLink } from './raffle.js?v=2.3';
 
 let currentState = null;
 let currentFilter = 'all'; // 'all' | 'pending' | 'confirmed'
+let isRaffling = false;
+let currentRaffleTickets = [];
 
 export function initAdminController() {
     subscribeToState((state) => {
@@ -15,6 +18,7 @@ export function initAdminController() {
             renderAdminGuessesTable();
             populateSettingsForm();
             updatePendingBadge();
+            updateRaffleUI();
         }
     });
 
@@ -23,6 +27,7 @@ export function initAdminController() {
     });
 
     setupAdminEventListeners();
+    setupRaffleEventListeners();
 }
 
 function updateAdminAuthUI(user) {
@@ -269,13 +274,17 @@ function setupAdminEventListeners() {
     }
 }
 
-export function openAdminDashboard() {
+export function openAdminDashboard(targetTab = null) {
     const dashboard = document.getElementById('admin-dashboard-modal');
     if (!dashboard) return;
     dashboard.classList.remove('hidden');
     renderAdminGuessesTable();
     populateSettingsForm();
     updatePendingBadge();
+    updateRaffleUI();
+    if (targetTab) {
+        switchAdminTab(targetTab);
+    }
 }
 
 function switchAdminTab(targetTab) {
@@ -284,9 +293,9 @@ function switchAdminTab(targetTab) {
 
     tabBtns.forEach(btn => {
         if (btn.getAttribute('data-tab') === targetTab) {
-            btn.className = 'admin-tab-btn px-4 py-2 text-sm font-semibold text-pink-600 border-b-2 border-pink-600 bg-pink-50/50 rounded-t-xl transition';
+            btn.className = 'admin-tab-btn px-4 py-2 text-sm font-semibold text-[#3B0069] border-b-2 border-[#8F56AD] bg-[#BE9ECF]/20 rounded-t-xl transition flex items-center gap-1.5 whitespace-nowrap';
         } else {
-            btn.className = 'admin-tab-btn px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition';
+            btn.className = 'admin-tab-btn px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap';
         }
     });
 
@@ -297,6 +306,10 @@ function switchAdminTab(targetTab) {
             pane.classList.add('hidden');
         }
     });
+
+    if (targetTab === 'sorteio') {
+        updateRaffleUI();
+    }
 }
 
 function populateSettingsForm() {
@@ -451,8 +464,281 @@ export function showToast(message, type = 'info') {
     }, 3500);
 }
 
+// ==========================================
+// CONTROLADOR DO SISTEMA DE SORTEIO OFICIAL
+// ==========================================
+
+function setupRaffleEventListeners() {
+    const quickRaffleBtn = document.getElementById('btn-quick-raffle');
+    const modeSelect = document.getElementById('raffle-mode-select');
+    const genderContainer = document.getElementById('raffle-gender-container');
+    const targetGenderSelect = document.getElementById('raffle-target-gender');
+    const excludePrevCheckbox = document.getElementById('raffle-exclude-previous');
+    const runRaffleBtn = document.getElementById('btn-run-raffle');
+    const resetHistoryBtn = document.getElementById('btn-reset-raffle-history');
+
+    if (quickRaffleBtn) {
+        quickRaffleBtn.addEventListener('click', () => {
+            switchAdminTab('sorteio');
+        });
+    }
+
+    if (modeSelect) {
+        modeSelect.addEventListener('change', () => {
+            if (genderContainer) {
+                if (modeSelect.value === 'correct') {
+                    genderContainer.classList.remove('hidden');
+                } else {
+                    genderContainer.classList.add('hidden');
+                }
+            }
+            updateRaffleUI();
+        });
+    }
+
+    if (targetGenderSelect) {
+        targetGenderSelect.addEventListener('change', () => updateRaffleUI());
+    }
+
+    if (excludePrevCheckbox) {
+        excludePrevCheckbox.addEventListener('change', () => updateRaffleUI());
+    }
+
+    if (runRaffleBtn) {
+        runRaffleBtn.addEventListener('click', () => runRaffleDraw());
+    }
+
+    if (resetHistoryBtn) {
+        resetHistoryBtn.addEventListener('click', async () => {
+            const confirmed = confirm('Tem certeza de que deseja zerar o histórico de sorteios realizados? Essa ação não pode ser desfeita.');
+            if (confirmed) {
+                await resetDrawHistory();
+                updateRaffleUI();
+                showToast('Histórico de sorteios zerado com sucesso!', 'info');
+            }
+        });
+    }
+}
+
+function updateRaffleUI() {
+    const modeSelect = document.getElementById('raffle-mode-select');
+    const targetGenderSelect = document.getElementById('raffle-target-gender');
+    const excludePrevCheckbox = document.getElementById('raffle-exclude-previous');
+    const summaryBadge = document.getElementById('raffle-eligible-summary');
+
+    const mode = modeSelect ? modeSelect.value : 'all';
+    const targetGender = targetGenderSelect ? targetGenderSelect.value : 'boy';
+    const excludePreviousWinners = excludePrevCheckbox ? excludePrevCheckbox.checked : true;
+
+    const previousWinners = currentState?.draws || getDrawHistory() || [];
+
+    currentRaffleTickets = buildRaffleTickets(
+        currentState?.guesses || [],
+        { mode, targetGender, excludePreviousWinners },
+        previousWinners
+    );
+
+    if (summaryBadge) {
+        const uniqueParticipants = new Set(currentRaffleTickets.map(t => t.guestName?.trim().toLowerCase())).size;
+        summaryBadge.textContent = `${currentRaffleTickets.length} cota(s) (${uniqueParticipants} participante(s))`;
+    }
+
+    renderRaffleHistoryTable();
+}
+
+function renderRaffleHistoryTable() {
+    const tbody = document.getElementById('raffle-history-tbody');
+    if (!tbody) return;
+
+    const history = currentState?.draws || getDrawHistory() || [];
+
+    if (!Array.isArray(history) || history.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">Nenhum sorteio realizado ainda.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = history.map((item, idx) => {
+        const dateFormatted = item.drawnAt ? new Date(item.drawnAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '--';
+        const genderBadge = item.gender === 'girl' ? 
+            `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#BE9ECF]/30 text-[#3B0069]">🌸 Menina</span>` : 
+            `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#CEE1DF]/60 text-[#03665A]">🌿 Menino</span>`;
+        
+        const modeBadge = item.mode === 'correct' ? 
+            `<span class="text-amber-700 font-semibold">Acertadores</span>` : 
+            `<span class="text-slate-500 font-normal">Geral</span>`;
+
+        const waLink = createWhatsAppCelebrationLink(item, item.prizeTitle || 'Prêmio do Bolão');
+        const contactAction = waLink ? 
+            `<a href="${waLink}" target="_blank" class="inline-flex items-center gap-1 text-[#03665A] hover:text-[#02423A] font-bold bg-[#CEE1DF]/40 hover:bg-[#CEE1DF] px-2.5 py-1 rounded-lg transition" title="Enviar WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp</a>` : 
+            `<span class="text-slate-400">Sem telefone</span>`;
+
+        return `
+            <tr class="hover:bg-slate-50/70 transition">
+                <td class="py-2.5 px-3 font-bold text-slate-800">${history.length - idx}º</td>
+                <td class="py-2.5 px-3 font-semibold text-slate-900">${escapeHtml(item.winnerName)}</td>
+                <td class="py-2.5 px-3">${genderBadge}</td>
+                <td class="py-2.5 px-3 text-center font-bold">${item.quotasCount || 1}</td>
+                <td class="py-2.5 px-3">${modeBadge}</td>
+                <td class="py-2.5 px-3 text-slate-500">${dateFormatted}</td>
+                <td class="py-2.5 px-3 text-right">${contactAction}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function runRaffleDraw() {
+    if (isRaffling) return;
+
+    updateRaffleUI();
+
+    if (!currentRaffleTickets || currentRaffleTickets.length === 0) {
+        alert('⚠️ Não há participantes elegíveis na urna com as opções selecionadas. Certifique-se de que há palpites com pagamento confirmado!');
+        return;
+    }
+
+    isRaffling = true;
+
+    const displayBox = document.getElementById('raffle-display-box');
+    const displayName = document.getElementById('raffle-display-name');
+    const displayDetail = document.getElementById('raffle-display-detail');
+    const winnerCard = document.getElementById('raffle-winner-card');
+    const runBtn = document.getElementById('btn-run-raffle');
+    const modeSelect = document.getElementById('raffle-mode-select');
+    const targetGenderSelect = document.getElementById('raffle-target-gender');
+    const prizeTitleInput = document.getElementById('raffle-prize-title');
+
+    if (winnerCard) winnerCard.classList.add('hidden');
+    if (runBtn) {
+        runBtn.disabled = true;
+        runBtn.classList.add('opacity-60', 'cursor-not-allowed');
+        runBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xl"></i> <span>Sorteando...</span>`;
+    }
+
+    if (displayBox) {
+        displayBox.className = 'w-full max-w-md mx-auto py-4 px-6 rounded-2xl bg-white border-2 border-[#8F56AD] shadow-md transition-all duration-100 animate-roulette-spin';
+    }
+
+    // Seleciona o bilhete vencedor antecipadamente com segurança criptográfica
+    const winningTicket = selectWinningTicket(currentRaffleTickets);
+    const totalDuration = 3800; // 3.8 segundos de animação e suspense
+    const startTime = Date.now();
+    let currentInterval = 35;
+
+    function spinCycle() {
+        const elapsed = Date.now() - startTime;
+        const randomTicket = currentRaffleTickets[Math.floor(Math.random() * currentRaffleTickets.length)];
+
+        if (displayName) displayName.textContent = randomTicket.guestName;
+        if (displayDetail) {
+            const genderTag = randomTicket.gender === 'girl' ? '🌸 Menina' : '🌿 Menino';
+            displayDetail.textContent = `Palpite: ${genderTag} • Cota ${randomTicket.quotaNumber} de ${randomTicket.totalQuotas}`;
+        }
+
+        if (elapsed < totalDuration) {
+            // Desaceleração exponencial (easing out suave)
+            const progress = elapsed / totalDuration;
+            currentInterval = 35 + Math.pow(progress, 3) * 380;
+            setTimeout(spinCycle, currentInterval);
+        } else {
+            finalizeDraw(winningTicket);
+        }
+    }
+
+    spinCycle();
+
+    async function finalizeDraw(winner) {
+        if (displayBox) {
+            displayBox.className = 'w-full max-w-md mx-auto py-4 px-6 rounded-2xl bg-white border-2 border-emerald-500 shadow-md transition-all duration-300';
+        }
+        if (displayName) displayName.textContent = winner.guestName;
+        if (displayDetail) displayDetail.textContent = `🎉 Vencedor(a) Sorteado(a)! (${winner.totalQuotas} cotas)`;
+
+        const prizeTitle = prizeTitleInput ? prizeTitleInput.value.trim() : 'Prêmio do Bolão';
+        const mode = modeSelect ? modeSelect.value : 'all';
+        const targetGender = targetGenderSelect ? targetGenderSelect.value : null;
+
+        const drawData = {
+            guessId: winner.guessId,
+            winnerName: winner.guestName,
+            whatsapp: winner.whatsapp,
+            gender: winner.gender,
+            quotasCount: winner.totalQuotas,
+            totalAmount: winner.totalAmount,
+            mode,
+            targetGender: mode === 'correct' ? targetGender : null,
+            prizeTitle: prizeTitle || 'Prêmio do Bolão'
+        };
+
+        const savedResult = await saveDraw(drawData);
+
+        // Disparo comemorativo de confetes
+        triggerRaffleConfetti();
+
+        // Renderiza e revela o cartão do vencedor
+        if (winnerCard) {
+            const nameEl = document.getElementById('raffle-winner-name');
+            const genderEl = document.getElementById('raffle-winner-gender');
+            const quotasEl = document.getElementById('raffle-winner-quotas');
+            const waBtn = document.getElementById('raffle-winner-whatsapp-btn');
+
+            if (nameEl) nameEl.textContent = winner.guestName;
+            if (genderEl) genderEl.textContent = winner.gender === 'girl' ? '🌸 Votou em Menina' : '🌿 Votou em Menino';
+            if (quotasEl) quotasEl.textContent = `🎟️ ${winner.totalQuotas} Cota(s) (${winner.quotaNumber}ª cota premiada)`;
+
+            const waLink = createWhatsAppCelebrationLink(savedResult, prizeTitle);
+            if (waBtn) {
+                if (waLink) {
+                    waBtn.href = waLink;
+                    waBtn.classList.remove('hidden');
+                } else {
+                    waBtn.classList.add('hidden');
+                }
+            }
+
+            winnerCard.classList.remove('hidden');
+        }
+
+        if (runBtn) {
+            runBtn.disabled = false;
+            runBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+            runBtn.innerHTML = `<i class="fa-solid fa-dice text-xl text-[#CEE1DF]"></i> <span>Sortear Novamente</span>`;
+        }
+
+        isRaffling = false;
+        updateRaffleUI();
+        showToast(`🎉 Parabéns ${winner.guestName}! Sorteio concluído com sucesso!`, 'success');
+    }
+}
+
+function triggerRaffleConfetti() {
+    if (typeof confetti !== 'function') return;
+    confetti({
+        particleCount: 85,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: ['#03665A', '#689D97', '#8F56AD', '#3B0069', '#FFD700', '#CEE1DF']
+    });
+    setTimeout(() => {
+        confetti({
+            particleCount: 50,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#03665A', '#8F56AD', '#BE9ECF']
+        });
+        confetti({
+            particleCount: 50,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#3B0069', '#689D97', '#CEE1DF']
+        });
+    }, 250);
+}
+
 function escapeHtml(text) {
     if (!text) return '';
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return text.replace(/[&<>"']/g, m => map[m]);
 }
+

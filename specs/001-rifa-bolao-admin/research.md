@@ -1,3 +1,4 @@
+
 # Research & Technical Decisions: Gestão Completa de Rifa e Bolão
 
 **Feature**: `001-rifa-bolao-admin`

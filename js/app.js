@@ -1,11 +1,11 @@
 // js/app.js - Orquestrador Principal da Aplicação
 
-import { initDatabase, subscribeToGuesses, subscribeToEventConfig, addGuess, isUsingCloud } from './db.js?v=2.2';
-import { initAuth } from './auth.js?v=2.2';
-import { updateStateFromConfig, updateStateFromGuesses, subscribeToState } from './state.js?v=2.2';
-import { updateScoreboard } from './ranking.js?v=2.2';
-import { initCountdown } from './countdown.js?v=2.2';
-import { initAdminController, showToast } from './admin.js?v=2.2';
+import { initDatabase, subscribeToGuesses, subscribeToEventConfig, subscribeToDraws, addGuess, isUsingCloud } from './db.js?v=2.3';
+import { initAuth } from './auth.js?v=2.3';
+import { updateStateFromConfig, updateStateFromGuesses, updateStateFromDraws, subscribeToState } from './state.js?v=2.3';
+import { updateScoreboard } from './ranking.js?v=2.3';
+import { initCountdown } from './countdown.js?v=2.3';
+import { initAdminController, showToast } from './admin.js?v=2.3';
 
 let latestState = null;
 
@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     subscribeToGuesses((guesses) => {
         updateStateFromGuesses(guesses);
+    });
+
+    subscribeToDraws((draws) => {
+        updateStateFromDraws(draws);
     });
 
     // 3. Reage a qualquer mudança de estado calculada
@@ -109,20 +113,19 @@ function renderPublicView(state) {
 }
 
 function updatePixQrCode(config) {
-    const pixKey = config?.pixKey || 'charevelacao@email.com';
+    const pixKey = config?.pixKey || 'argeu-rodrigues-dxm@jim.com';
+    const copiaECola = config?.pixCopiaECola || '00020101021126490014BR.GOV.BCB.PIX0127argeu-rodrigues-dxm@jim.com5204000053039865802BR5925ARGEU RODRIGUES PINTO FIL6009SAO PAULO62070503***63040836';
+    const qrUrl = config?.pixQrCodeUrl || 'assets/pix-qrcode.png';
+
     const qrImg = document.getElementById('pix-qrcode-img');
     const qrTextContainer = document.getElementById('pix-copia-cola-text');
 
-    // Monta payload Pix ou chave simples para geração imediata de QR Code
-    const qrData = encodeURIComponent(pixKey);
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${qrData}&color=1e293b`;
-
-    if (qrImg && qrImg.src !== qrUrl) {
+    if (qrImg && !qrImg.src.endsWith(qrUrl)) {
         qrImg.src = qrUrl;
     }
 
     if (qrTextContainer) {
-        qrTextContainer.textContent = pixKey;
+        qrTextContainer.textContent = copiaECola;
     }
 }
 
@@ -239,12 +242,14 @@ function setupPublicForm() {
 
             // Prepara texto e link para WhatsApp
             const icon = gender === 'boy' ? '💙' : '💖';
-            const pixKey = latestState?.config?.pixKey || 'charevelacao@email.com';
+            const pixKey = latestState?.config?.pixKey || 'argeu-rodrigues-dxm@jim.com';
+            const pixReceiver = latestState?.config?.pixReceiverName || 'ARGEU RODRIGUES PINTO FIL';
 
             const mensagemWhats = `Olá! Meu nome é *${nome}*.\nAcabei de registrar meu palpite no Bolão de Chá Revelação!\n\n` +
                 `🎯 Meu palpite oficial: *É ${babyNameChosen.toUpperCase()}! ${icon}*\n` +
                 `🎟️ Quantidade de Cotas: *${quotasCount} cota${quotasCount > 1 ? 's' : ''}* (R$ ${totalAmount.toFixed(2).replace('.', ',')})\n` +
-                `🔑 Chave Pix: ${pixKey}\n\n` +
+                `🔑 Chave Pix: ${pixKey}\n` +
+                `👤 Titular: ${pixReceiver}\n\n` +
                 `Segue em anexo o comprovante da transferência Pix! 📸✨`;
 
             if (whatsappLink) {
@@ -270,19 +275,90 @@ function setupPublicForm() {
 }
 
 function setupPixCopyHelper() {
-    const copyBtns = document.querySelectorAll('.btn-copy-pix');
-    copyBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const pixKey = latestState?.config?.pixKey || '';
+    // 1. Copiar Chave Pix Simples (E-mail)
+    const copyKeyBtns = document.querySelectorAll('.btn-copy-pix');
+    copyKeyBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pixKey = latestState?.config?.pixKey || 'argeu-rodrigues-dxm@jim.com';
             if (pixKey) {
-                navigator.clipboard.writeText(pixKey).then(() => {
-                    showToast('Chave Pix copiada com sucesso!', 'success');
-                }).catch(() => {
-                    prompt('Copie a chave Pix:', pixKey);
-                });
+                copyTextToClipboard(pixKey, 'Chave Pix copiada com sucesso! 📋');
             }
         });
     });
+
+    // 2. Copiar Código Pix Copia e Cola (BR Code completo)
+    const copyCopiaColaBtns = document.querySelectorAll('.btn-copy-copia-cola');
+    copyCopiaColaBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const code = latestState?.config?.pixCopiaECola || 
+                '00020101021126490014BR.GOV.BCB.PIX0127argeu-rodrigues-dxm@jim.com5204000053039865802BR5925ARGEU RODRIGUES PINTO FIL6009SAO PAULO62070503***63040836';
+            if (code) {
+                copyTextToClipboard(code, 'Código Pix Copia e Cola copiado! Cole no aplicativo do seu banco para pagar. 🚀');
+            }
+        });
+    });
+
+    // 3. Modal de Ampliação do QR Code Pix
+    const modalQr = document.getElementById('modal-qr-expand');
+    const btnExpand = document.getElementById('btn-expand-qr');
+    const triggerContainer = document.getElementById('qr-container-trigger');
+    const btnCloseModal = document.getElementById('btn-close-qr-modal');
+
+    const openQrModal = (e) => {
+        if (e) e.preventDefault();
+        if (modalQr) modalQr.classList.remove('hidden');
+    };
+
+    const closeQrModal = (e) => {
+        if (e) e.preventDefault();
+        if (modalQr) modalQr.classList.add('hidden');
+    };
+
+    if (btnExpand) btnExpand.addEventListener('click', openQrModal);
+    if (triggerContainer) triggerContainer.addEventListener('click', openQrModal);
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeQrModal);
+    if (modalQr) {
+        modalQr.addEventListener('click', (e) => {
+            if (e.target === modalQr) closeQrModal();
+        });
+    }
+}
+
+function copyTextToClipboard(text, successMsg) {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast(successMsg, 'success');
+        }).catch(() => {
+            fallbackCopyText(text, successMsg);
+        });
+    } else {
+        fallbackCopyText(text, successMsg);
+    }
+}
+
+function fallbackCopyText(text, successMsg) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    textarea.style.top = '0';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showToast(successMsg, 'success');
+        } else {
+            prompt('Copie o código abaixo:', text);
+        }
+    } catch {
+        prompt('Copie o código abaixo:', text);
+    } finally {
+        document.body.removeChild(textarea);
+    }
 }
 
 function setupMobileMenu() {

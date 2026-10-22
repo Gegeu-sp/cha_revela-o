@@ -7,10 +7,12 @@ let app = null;
 let useCloud = false;
 let cachedConfig = null;
 let cachedGuesses = null;
+let cachedDraws = null;
 
 // Callbacks registrados para sincronização
 const guessListeners = new Set();
 const configListeners = new Set();
+const drawListeners = new Set();
 
 // Inicialização limpa: lista vazia por padrão para o Bolão começar do zero
 const initialMockGuesses = [];
@@ -69,6 +71,23 @@ export async function initDatabase() {
                 notifyGuessListeners(cachedGuesses);
             });
 
+            // Listener em tempo real para sorteios (Multi-dispositivo para telão/apresentação)
+            const drawsRef = collection(db, 'draws');
+            onSnapshot(drawsRef, (snapshot) => {
+                const list = [];
+                snapshot.forEach(docSnap => {
+                    list.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                list.sort((a, b) => new Date(b.drawnAt || 0) - new Date(a.drawnAt || 0));
+                cachedDraws = list;
+                localStorage.setItem('bolao_draws', JSON.stringify(list));
+                notifyDrawListeners(list);
+            }, (error) => {
+                console.warn('Erro ao escutar sorteios no Firestore, usando fallback local:', error);
+                cachedDraws = getLocalDraws();
+                notifyDrawListeners(cachedDraws);
+            });
+
             return { useCloud: true };
         } catch (err) {
             console.warn('⚠️ Falha ao inicializar Firebase. Ativando modo local resiliente:', err);
@@ -91,6 +110,9 @@ function initLocalFallback() {
     if (!localStorage.getItem('bolao_guesses')) {
         localStorage.setItem('bolao_guesses', JSON.stringify([]));
     }
+    if (!localStorage.getItem('bolao_draws')) {
+        localStorage.setItem('bolao_draws', JSON.stringify([]));
+    }
 
     // Escuta alterações entre abas diferentes no mesmo navegador
     window.addEventListener('storage', (event) => {
@@ -100,19 +122,35 @@ function initLocalFallback() {
         if (event.key === 'bolao_event_settings') {
             notifyConfigListeners(getLocalConfig());
         }
+        if (event.key === 'bolao_draws') {
+            notifyDrawListeners(getLocalDraws());
+        }
     });
 
     // Notifica estado inicial
     setTimeout(() => {
         notifyConfigListeners(getLocalConfig());
         notifyGuessListeners(getLocalGuesses());
+        notifyDrawListeners(getLocalDraws());
     }, 50);
 }
 
 function getLocalConfig() {
     try {
         const val = localStorage.getItem('bolao_event_settings');
-        return val ? JSON.parse(val) : defaultEventSettings;
+        if (!val) return defaultEventSettings;
+        const config = JSON.parse(val);
+        // Atualiza chaves antigas de demonstração para a chave oficial do Argeu
+        if (config && (config.pixKey === 'charevelacao@email.com' || !config.pixCopiaECola)) {
+            config.pixKey = defaultEventSettings.pixKey;
+            config.pixReceiverName = defaultEventSettings.pixReceiverName;
+            config.pixCity = defaultEventSettings.pixCity;
+            config.pixProvider = defaultEventSettings.pixProvider;
+            config.pixCopiaECola = defaultEventSettings.pixCopiaECola;
+            config.pixQrCodeUrl = defaultEventSettings.pixQrCodeUrl;
+            localStorage.setItem('bolao_event_settings', JSON.stringify(config));
+        }
+        return config;
     } catch {
         return defaultEventSettings;
     }
@@ -285,3 +323,88 @@ export async function resetAllGuesses() {
 export function isUsingCloud() {
     return useCloud;
 }
+
+// ==========================================
+// MÉTODOS DE HISTÓRICO E PERSISTÊNCIA DE SORTEIOS
+// ==========================================
+
+function getLocalDraws() {
+    try {
+        const val = localStorage.getItem('bolao_draws');
+        return val ? JSON.parse(val) : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveLocalDraws(draws) {
+    localStorage.setItem('bolao_draws', JSON.stringify(draws));
+    notifyDrawListeners(draws);
+}
+
+function notifyDrawListeners(draws) {
+    drawListeners.forEach(fn => fn(draws));
+}
+
+export function subscribeToDraws(callback) {
+    drawListeners.add(callback);
+    callback(cachedDraws || getLocalDraws());
+    return () => drawListeners.delete(callback);
+}
+
+export async function saveDraw(drawData) {
+    const drawItem = {
+        ...drawData,
+        drawnAt: drawData.drawnAt || new Date().toISOString()
+    };
+
+    if (useCloud && db) {
+        try {
+            const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            const docRef = await addDoc(collection(db, 'draws'), drawItem);
+            const item = { id: docRef.id, ...drawItem };
+            const current = getLocalDraws();
+            current.unshift(item);
+            cachedDraws = current;
+            saveLocalDraws(current);
+            return item;
+        } catch (err) {
+            console.warn('Falha ao salvar sorteio no Firestore, usando fallback local:', err);
+        }
+    }
+
+    const current = getLocalDraws();
+    const id = 'draw_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+    const item = { id, ...drawItem };
+    current.unshift(item);
+    cachedDraws = current;
+    saveLocalDraws(current);
+    return item;
+}
+
+export function getDrawHistory() {
+    return cachedDraws || getLocalDraws();
+}
+
+export async function resetDrawHistory() {
+    cachedDraws = [];
+    localStorage.setItem('bolao_draws', JSON.stringify([]));
+    notifyDrawListeners([]);
+
+    if (useCloud && db) {
+        try {
+            const { collection, getDocs, deleteDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            const snap = await getDocs(collection(db, 'draws'));
+            const deletePromises = [];
+            snap.forEach(d => {
+                deletePromises.push(deleteDoc(doc(db, 'draws', d.id)));
+            });
+            await Promise.all(deletePromises);
+            console.log('✅ Histórico de sorteios apagado do Firestore com sucesso!');
+        } catch (err) {
+            console.error('Erro ao deletar sorteios no Firestore:', err);
+        }
+    }
+    return { success: true };
+}
+

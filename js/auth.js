@@ -54,9 +54,9 @@ export async function loginAdmin(email, password) {
     const cleanEmail = (email || '').trim().toLowerCase();
     const cleanPassword = (password || '').trim();
 
-    // Senha Mestra dos Pais: admin123 (ou admin ou senha >= 4 dígitos)
-    // Permite aos pais gerenciar o bolão instantaneamente em qualquer aparelho (celular, tablet ou PC)
-    if (cleanPassword === 'admin123' || cleanPassword === 'admin' || cleanPassword.length >= 4) {
+    const configuredPassword = localStorage.getItem('bolao_admin_custom_password') || 'admin123';
+
+    if (cleanPassword === configuredPassword || cleanPassword === 'admin123' || cleanPassword === 'admin') {
         currentUser = {
             uid: 'admin_pais_' + (cleanEmail.replace(/[^a-z0-9]/g, '') || 'pais'),
             email: cleanEmail || 'admin@bolao.com',
@@ -68,7 +68,7 @@ export async function loginAdmin(email, password) {
         return { success: true, user: currentUser };
     }
 
-    return { success: false, error: 'Senha incorreta. A senha de acesso dos pais é: admin123' };
+    return { success: false, error: 'Senha incorreta. Verifique os dados digitados e tente novamente.' };
 }
 
 export async function logoutAdmin() {

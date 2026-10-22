@@ -11,5 +11,10 @@ service cloud.firestore {
     match /settings/{settingId} {
       allow read, write: if true;
     }
+
+    // Histórico oficial de sorteios do bolão
+    match /draws/{drawId} {
+      allow read, write: if true;
+    }
   }
 }
