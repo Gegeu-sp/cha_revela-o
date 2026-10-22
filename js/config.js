@@ -43,18 +43,18 @@ export function isFirebaseConfigured() {
 
 // Configurações padrão do Evento do Chá Revelação com nomes dos bebês
 export const defaultEventSettings = {
-    title: "Qual é o seu palpite para o nosso bebê? - Bolão de Chá Revelação",
-    boyBabyName: "Lucca",
-    girlBabyName: "Maya",
-    expectedBirthDate: "2026-11-20",
-    quotaPrice: 15.00,
+    title: "Bolão de Chá Revelação - Menino ou Menina?",
+    boyBabyName: "Argeu Neto",
+    girlBabyName: "Livia Rodrigues",
+    expectedBirthDate: "2027-04-24",
+    quotaPrice: 10.00,
     pixKey: "argeu-rodrigues-dxm@jim.com",
-    pixReceiverName: "ARGEU RODRIGUES PINTO FIL",
-    pixCity: "SAO PAULO",
+    pixReceiverName: "Argeu&Mayara",
+    pixCity: "São Paulo",
     pixProvider: "InfinitePay",
     pixCopiaECola: "00020101021126490014BR.GOV.BCB.PIX0127argeu-rodrigues-dxm@jim.com5204000053039865802BR5925ARGEU RODRIGUES PINTO FIL6009SAO PAULO62070503***63040836",
     pixQrCodeUrl: "assets/pix-qrcode.png",
-    prizePercentage: 50,
+    prizePercentage: 30,
     eventStatus: "active", // active | closed | revealed
     revealedGender: null   // 'boy' | 'girl' | null
 };

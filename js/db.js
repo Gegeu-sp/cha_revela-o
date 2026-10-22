@@ -17,6 +17,38 @@ const drawListeners = new Set();
 // Inicialização limpa: lista vazia por padrão para o Bolão começar do zero
 const initialMockGuesses = [];
 
+// Função de deduplicação rigorosa (por ID e por assinatura semântica)
+export function deduplicateGuesses(guesses) {
+    if (!Array.isArray(guesses)) return [];
+    const seenIds = new Set();
+    const seenSignatures = new Set();
+    const result = [];
+
+    for (const g of guesses) {
+        if (!g) continue;
+        
+        // 1. Checagem por ID único
+        if (g.id) {
+            if (seenIds.has(g.id)) continue;
+            seenIds.add(g.id);
+        }
+
+        // 2. Checagem por assinatura semântica (evita duplicações por duplo clique ou conflito temporário)
+        const name = (g.guestName || '').trim().toLowerCase();
+        const phone = (g.whatsapp || '').replace(/\D/g, '');
+        const timeBucket = g.createdAt ? Math.floor(new Date(g.createdAt).getTime() / (120 * 1000)) : 0;
+        const signature = `${name}_${phone}_${g.gender}_${g.quotasCount}_${timeBucket}`;
+        
+        if (timeBucket > 0) {
+            if (seenSignatures.has(signature)) continue;
+            seenSignatures.add(signature);
+        }
+
+        result.push(g);
+    }
+    return result;
+}
+
 export async function initDatabase() {
     if (isFirebaseConfigured()) {
         try {
@@ -51,38 +83,6 @@ export async function initDatabase() {
                 cachedConfig = getLocalConfig();
                 notifyConfigListeners(cachedConfig);
             });
-
-// Função de deduplicação rigorosa (por ID e por assinatura semântica)
-export function deduplicateGuesses(guesses) {
-    if (!Array.isArray(guesses)) return [];
-    const seenIds = new Set();
-    const seenSignatures = new Set();
-    const result = [];
-
-    for (const g of guesses) {
-        if (!g) continue;
-        
-        // 1. Checagem por ID único
-        if (g.id) {
-            if (seenIds.has(g.id)) continue;
-            seenIds.add(g.id);
-        }
-
-        // 2. Checagem por assinatura semântica (evita duplicações por duplo clique ou conflito temporário)
-        const name = (g.guestName || '').trim().toLowerCase();
-        const phone = (g.whatsapp || '').replace(/\D/g, '');
-        const timeBucket = g.createdAt ? Math.floor(new Date(g.createdAt).getTime() / (120 * 1000)) : 0;
-        const signature = `${name}_${phone}_${g.gender}_${g.quotasCount}_${timeBucket}`;
-        
-        if (timeBucket > 0) {
-            if (seenSignatures.has(signature)) continue;
-            seenSignatures.add(signature);
-        }
-
-        result.push(g);
-    }
-    return result;
-}
 
             // Listener em tempo real para palpites (Multi-dispositivo em tempo real)
             const guessesRef = collection(db, 'guesses');
