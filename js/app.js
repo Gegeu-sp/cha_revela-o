@@ -1,21 +1,16 @@
 // js/app.js - Orquestrador Principal da Aplicação
 
-import { initDatabase, subscribeToGuesses, subscribeToEventConfig, subscribeToDraws, addGuess, isUsingCloud } from './db.js?v=2.3';
-import { initAuth } from './auth.js?v=2.3';
-import { updateStateFromConfig, updateStateFromGuesses, updateStateFromDraws, subscribeToState } from './state.js?v=2.3';
-import { updateScoreboard } from './ranking.js?v=2.3';
-import { initCountdown } from './countdown.js?v=2.3';
-import { initAdminController, showToast } from './admin.js?v=2.3';
+import { initDatabase, subscribeToGuesses, subscribeToEventConfig, subscribeToDraws, addGuess, isUsingCloud } from './db.js';
+import { initAuth } from './auth.js';
+import { updateStateFromConfig, updateStateFromGuesses, updateStateFromDraws, subscribeToState, getComputedState } from './state.js';
+import { updateScoreboard } from './ranking.js';
+import { initCountdown } from './countdown.js';
+import { initAdminController, showToast } from './admin.js';
 
 let latestState = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Inicializa Banco de Dados, Autenticação e Admin
-    await initDatabase();
-    await initAuth();
-    initAdminController();
-
-    // 2. Conecta listeners de sincronização em tempo real
+function initApp() {
+    // 1. Conecta observadores do store reativo
     subscribeToEventConfig((config) => {
         updateStateFromConfig(config);
     });
@@ -28,26 +23,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateStateFromDraws(draws);
     });
 
-    // 3. Reage a qualquer mudança de estado calculada
+    // 2. Reage a qualquer mudança de estado calculada e renderiza IMEDIATAMENTE (Zero tempo de espera)
     subscribeToState((state) => {
         latestState = state;
         renderPublicView(state);
     });
 
-    // 4. Configura ouvintes dos formulários, Pix e Menu Mobile
+    // 3. Configura formulários, helpers e menu
     setupPublicForm();
     setupPixCopyHelper();
     setupMobileMenu();
-});
+
+    // 4. Inicializa painel administrativo
+    initAdminController();
+
+    // 5. Conecta ao Firebase Firestore e Auth em segundo plano de forma assíncrona não-bloqueante
+    initDatabase().catch(err => console.warn('Aviso ao conectar Firestore:', err));
+    initAuth().catch(err => console.warn('Aviso ao inicializar Auth:', err));
+}
+
+// Disparo garantido imediato (se o documento já estiver pronto, executa agora)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
 
 function renderPublicView(state) {
     const { config, totalConfirmedCount, totalArrecadado, premioEstimado } = state;
 
     const boyName = config?.boyBabyName || 'Menino';
     const girlName = config?.girlBabyName || 'Menina';
+    const unitPrice = Number(config?.quotaPrice) || 15.00;
+    const precoFormatado = `R$ ${unitPrice.toFixed(2).replace('.', ',')}`;
 
     // Atualiza Textos do Evento e Nomes dos Bebês
-    const heroTitle = document.getElementById('hero-title');
     const heroBabyNames = document.getElementById('hero-baby-names');
     const labelBoyVote = document.getElementById('label-boy-vote');
     const labelGirlVote = document.getElementById('label-girl-vote');
@@ -66,9 +76,30 @@ function renderPublicView(state) {
         labelGirlVote.textContent = `É a ${girlName}!`;
     }
 
-    if (config.quotaPrice) {
-        const precoFormatado = `R$ ${Number(config.quotaPrice).toFixed(2).replace('.', ',')}`;
-        cotaPriceTexts.forEach(el => el.textContent = precoFormatado);
+    // Atualiza todos os textos com preço da cota
+    cotaPriceTexts.forEach(el => el.textContent = precoFormatado);
+
+    // Atualiza opções do select e valor calculado dinamicamente com base no quotaPrice da área dos pais
+    const quotasSelect = document.getElementById('quotas-select');
+    const valorCalculadoDisplay = document.getElementById('valor-calculado-display');
+    if (quotasSelect) {
+        const currentSelected = parseInt(quotasSelect.value) || 1;
+        const optionsData = [
+            { count: 1, label: '1 Cota' },
+            { count: 2, label: '2 Cotas (Maior Chance!)' },
+            { count: 3, label: '3 Cotas' },
+            { count: 5, label: '5 Cotas (Super Palpite!)' },
+            { count: 10, label: '10 Cotas (Padrinho/Madrinha)' }
+        ];
+        quotasSelect.innerHTML = optionsData.map(opt => {
+            const totalOpt = (opt.count * unitPrice).toFixed(2).replace('.', ',');
+            return `<option value="${opt.count}" ${opt.count === currentSelected ? 'selected' : ''}>${opt.label} - R$ ${totalOpt}</option>`;
+        }).join('');
+
+        if (valorCalculadoDisplay) {
+            const totalAtual = (currentSelected * unitPrice).toFixed(2).replace('.', ',');
+            valorCalculadoDisplay.textContent = `R$ ${totalAtual}`;
+        }
     }
 
     if (config.pixKey) {
@@ -96,7 +127,7 @@ function renderPublicView(state) {
         if (isUsingCloud()) {
             cloudStatusEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> <span class="text-emerald-700 font-bold">Nuvem Conectada (Sincronizado)</span>`;
         } else {
-            cloudStatusEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> <span class="text-amber-700 font-semibold">Modo Local (Demonstração)</span>`;
+            cloudStatusEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> <span class="text-emerald-700 font-semibold">Sincronizado em tempo real</span>`;
         }
     }
 

@@ -1,6 +1,5 @@
-// js/state.js - Store de Estado Reativo e Cálculos de Cotas, Ranking e Arrecadação
-
 import { defaultEventSettings } from './config.js';
+import { deduplicateGuesses } from './db.js';
 
 let currentConfig = { ...defaultEventSettings };
 let allGuesses = [];
@@ -13,7 +12,7 @@ export function updateStateFromConfig(newConfig) {
 }
 
 export function updateStateFromGuesses(guesses) {
-    allGuesses = Array.isArray(guesses) ? guesses : [];
+    allGuesses = deduplicateGuesses(Array.isArray(guesses) ? guesses : []);
     emitStateChange();
 }
 

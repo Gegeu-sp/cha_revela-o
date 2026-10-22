@@ -8,6 +8,9 @@
     <meta name="description"
         content="Qual é o seu palpite para o nosso bebê? Participe do nosso Bolão e Rifa de Chá Revelação, concorra a prêmios e ajude no enxoval!">
     <meta name="author" content="Argeu Rodrigues">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -156,7 +159,7 @@
             <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
                 <span
                     class="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-[#3B0069] shadow-xs border border-[#BE9ECF]/40 mb-6">
-                    <i class="fa-solid fa-gift text-[#8F56AD]"></i> Bolão & Rifa de Chá Revelação 🍼
+                    <i class="fa-solid fa-gift text-[#8F56AD]"></i> Bolão & Rifa de Chá Revelação 🍼 • <span class="cota-preco-texto">R$ 15,00 por cota</span>
                 </span>
 
                 <h2 id="hero-title"
@@ -176,7 +179,7 @@
                         class="flex items-center justify-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
                         <i class="fa-solid fa-calendar-check text-[#8F56AD]"></i> Previsão do Parto: <span
                             id="data-prevista-display"
-                            class="text-slate-800 font-extrabold font-heading">Carregando...</span>
+                            class="text-slate-800 font-extrabold font-heading">20 de novembro de 2026</span>
                     </div>
 
                     <div id="countdown-wrapper" class="grid grid-cols-3 gap-3 max-w-sm mx-auto text-center">
@@ -257,7 +260,7 @@
                         </div>
                         <h3 class="font-heading font-bold text-lg text-slate-800 mb-2">Escolha seu Time</h3>
                         <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                            Acha que vem Menino ou Menina? Escolha sua torcida e a quantidade de cotas que deseja para aumentar suas chances.
+                            Acha que vem Menino ou Menina? Escolha sua torcida e a quantidade de cotas que deseja (<span class="cota-preco-texto font-bold text-[#03665A]">R$ 15,00 cada</span>) para aumentar suas chances.
                         </p>
                     </div>
 
@@ -529,7 +532,7 @@
                         <!-- Seletor de Cotas da Rifa -->
                         <div class="bg-[#BE9ECF]/15 p-4 sm:p-5 rounded-2xl border border-[#BE9ECF]/40">
                             <label class="block text-sm font-bold text-slate-800 mb-2" for="quotas-select">
-                                <i class="fa-solid fa-ticket text-[#8F56AD]"></i> Quantidade de Cotas da Rifa
+                                <i class="fa-solid fa-ticket text-[#8F56AD]"></i> Quantidade de Cotas da Rifa (<span class="cota-preco-texto text-xs font-semibold text-[#8F56AD]">R$ 15,00 cada</span>)
                             </label>
                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                                 <select id="quotas-select"
@@ -1212,7 +1215,7 @@
     </div>
 
     <!-- Script Principal como ES6 Module -->
-    <script type="module" src="js/app.js?v=2.4"></script>
+    <script type="module" src="js/app.js?v=3.0"></script>
 </body>
 
 </html>

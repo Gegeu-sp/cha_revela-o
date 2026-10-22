@@ -1,10 +1,10 @@
 // js/admin.js - Controlador do Painel Administrativo dos Pais
 
-import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated } from './auth.js?v=2.3';
-import { updateGuess, deleteGuess, addGuess, saveEventConfig, resetAllGuesses, saveDraw, getDrawHistory, resetDrawHistory } from './db.js?v=2.3';
-import { subscribeToState } from './state.js?v=2.3';
-import { triggerCelebration } from './ranking.js?v=2.3';
-import { buildRaffleTickets, selectWinningTicket, createWhatsAppCelebrationLink } from './raffle.js?v=2.3';
+import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated } from './auth.js';
+import { updateGuess, deleteGuess, addGuess, saveEventConfig, resetAllGuesses, saveDraw, getDrawHistory, resetDrawHistory } from './db.js';
+import { subscribeToState } from './state.js';
+import { triggerCelebration } from './ranking.js';
+import { buildRaffleTickets, selectWinningTicket, createWhatsAppCelebrationLink } from './raffle.js';
 
 let currentState = null;
 let currentFilter = 'all'; // 'all' | 'pending' | 'confirmed'

@@ -106,6 +106,17 @@
 
 ---
 
+## Phase 9: User Story 6 - Eliminação de Duplicidades, Hidratação Imediata Zero-Flash e Reatividade da Cota (Priority: P1)
+
+**Goal**: Garantir que a página carregue instantaneamente sem estado "Carregando...", que qualquer alteração de valor de cota na área dos pais reflita imediatamente em todo o site, e que os palpites nunca apareçam duplicados.
+
+- [X] T025 [P] [US6] Implementar deduplicação estrita de palpites em `js/db.js` e `js/state.js` para impedir registros duplicados no Firestore e na tabela
+- [X] T026 [P] [US6] Tornar a inicialização e renderização síncronas e imediatas em `js/app.js` eliminando o bloqueio de `await initDatabase()` e a tela de "Carregando..."
+- [X] T027 [US6] Conectar dinamicamente todas as exibições de valor da cota (.cota-preco-texto, #quotas-select e cálculo total) em `js/app.js` e `index.html` para reagir em tempo real a mudanças na área dos pais
+- [X] T028 [US6] Adicionar meta tags anti-cache em `index.html`, atualizar versão dos scripts (`?v=3.0`), validar e publicar no Firebase e GitHub
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

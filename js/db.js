@@ -52,6 +52,38 @@ export async function initDatabase() {
                 notifyConfigListeners(cachedConfig);
             });
 
+// Função de deduplicação rigorosa (por ID e por assinatura semântica)
+export function deduplicateGuesses(guesses) {
+    if (!Array.isArray(guesses)) return [];
+    const seenIds = new Set();
+    const seenSignatures = new Set();
+    const result = [];
+
+    for (const g of guesses) {
+        if (!g) continue;
+        
+        // 1. Checagem por ID único
+        if (g.id) {
+            if (seenIds.has(g.id)) continue;
+            seenIds.add(g.id);
+        }
+
+        // 2. Checagem por assinatura semântica (evita duplicações por duplo clique ou conflito temporário)
+        const name = (g.guestName || '').trim().toLowerCase();
+        const phone = (g.whatsapp || '').replace(/\D/g, '');
+        const timeBucket = g.createdAt ? Math.floor(new Date(g.createdAt).getTime() / (120 * 1000)) : 0;
+        const signature = `${name}_${phone}_${g.gender}_${g.quotasCount}_${timeBucket}`;
+        
+        if (timeBucket > 0) {
+            if (seenSignatures.has(signature)) continue;
+            seenSignatures.add(signature);
+        }
+
+        result.push(g);
+    }
+    return result;
+}
+
             // Listener em tempo real para palpites (Multi-dispositivo em tempo real)
             const guessesRef = collection(db, 'guesses');
             onSnapshot(guessesRef, (snapshot) => {
@@ -62,9 +94,10 @@ export async function initDatabase() {
 
                 // Ordenação em memória resiliente e segura (mais recentes primeiro)
                 list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-                cachedGuesses = list;
-                localStorage.setItem('bolao_guesses', JSON.stringify(list));
-                notifyGuessListeners(list);
+                const deduped = deduplicateGuesses(list);
+                cachedGuesses = deduped;
+                localStorage.setItem('bolao_guesses', JSON.stringify(deduped));
+                notifyGuessListeners(deduped);
             }, (error) => {
                 console.warn('Erro ao escutar palpites no Firestore, usando fallback local:', error);
                 cachedGuesses = getLocalGuesses();
@@ -159,19 +192,23 @@ function getLocalConfig() {
 function getLocalGuesses() {
     try {
         const val = localStorage.getItem('bolao_guesses');
-        return val ? JSON.parse(val) : [];
+        if (!val) return [];
+        const parsed = JSON.parse(val);
+        return deduplicateGuesses(Array.isArray(parsed) ? parsed : []);
     } catch {
         return [];
     }
 }
 
 function saveLocalGuesses(guesses) {
-    localStorage.setItem('bolao_guesses', JSON.stringify(guesses));
-    notifyGuessListeners(guesses);
+    const deduped = deduplicateGuesses(guesses);
+    localStorage.setItem('bolao_guesses', JSON.stringify(deduped));
+    notifyGuessListeners(deduped);
 }
 
 function notifyGuessListeners(guesses) {
-    guessListeners.forEach(fn => fn(guesses));
+    const deduped = deduplicateGuesses(guesses);
+    guessListeners.forEach(fn => fn(deduped));
 }
 
 function notifyConfigListeners(config) {
@@ -237,22 +274,19 @@ export async function addGuess(guessData) {
             const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
             const docRef = await addDoc(collection(db, 'guesses'), newGuess);
             const item = { id: docRef.id, ...newGuess };
-            const current = getLocalGuesses();
-            current.unshift(item);
-            cachedGuesses = current;
-            saveLocalGuesses(current);
             return { success: true, ...item };
         } catch (err) {
             console.warn('Falha no Firestore addDoc, usando fallback local:', err);
         }
     }
 
-    const guesses = getLocalGuesses();
+    const current = getLocalGuesses();
     const id = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
     const itemWithId = { id, ...newGuess };
-    guesses.unshift(itemWithId);
-    cachedGuesses = guesses;
-    saveLocalGuesses(guesses);
+    current.unshift(itemWithId);
+    const deduped = deduplicateGuesses(current);
+    cachedGuesses = deduped;
+    saveLocalGuesses(deduped);
     return { success: true, id, ...newGuess };
 }
 
