@@ -1,20 +1,57 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Palpites do Bolão: leitura pública para o placar e envio liberado (bloqueando dados mock)
+    
+    // ========================================================
+    // 1. PALPITES DO BOLÃO (/guesses/{guessId})
+    // ========================================================
     match /guesses/{guessId} {
-      allow read, delete: if true;
-      allow create, update: if guessId != 'mock_1' && guessId != 'mock_2' && guessId != 'mock_3';
+      // Leitura pública liberada para alimentar o placar em tempo real e o ranking
+      allow read: if true;
+      
+      // Criação de novos palpites com esquema rígido de validação
+      allow create: if (
+        // IDs mock de demonstração não podem ser sobrescritos
+        guessId != 'mock_1' && guessId != 'mock_2' && guessId != 'mock_3' &&
+        // Nome obrigatório entre 2 e 100 caracteres
+        request.resource.data.guestName is string &&
+        request.resource.data.guestName.size() >= 2 &&
+        request.resource.data.guestName.size() <= 100 &&
+        // Gênero estritamente boy ou girl
+        request.resource.data.gender in ['boy', 'girl'] &&
+        // Quantidade de cotas inteira e positiva (1 a 100 cotas por envio)
+        request.resource.data.quotasCount is number &&
+        request.resource.data.quotasCount >= 1 &&
+        request.resource.data.quotasCount <= 100 &&
+        // Status inicial obrigatoriamente 'pending' (impede criação de apostas já pagas por anônimos)
+        request.resource.data.status == 'pending' &&
+        // Valor monetário total estritamente positivo
+        request.resource.data.totalAmount is number &&
+        request.resource.data.totalAmount > 0
+      );
+      
+      // Atualização (aprovação de cotas pelo admin) e Exclusão estritamente restritas a administradores
+      allow update, delete: if request.auth != null;
     }
     
-    // Configurações do evento (cotas, chave Pix, data e nomes dos bebês)
+    // ========================================================
+    // 2. CONFIGURAÇÕES DO EVENTO (/settings/{settingId})
+    // ========================================================
     match /settings/{settingId} {
-      allow read, write: if true;
+      // Leitura pública liberada (chave Pix, nomes dos bebês e valor da cota)
+      allow read: if true;
+      // Alteração de parâmetros restrita ao administrador autenticado
+      allow write: if request.auth != null;
     }
 
-    // Histórico oficial de sorteios do bolão
+    // ========================================================
+    // 3. HISTÓRICO OFICIAL DE SORTEIOS (/draws/{drawId})
+    // ========================================================
     match /draws/{drawId} {
-      allow read, write: if true;
+      // Leitura pública liberada para visualização do vencedor no telão
+      allow read: if true;
+      // Registro e gravação de sorteios restrita ao administrador autenticado
+      allow write: if request.auth != null;
     }
   }
 }

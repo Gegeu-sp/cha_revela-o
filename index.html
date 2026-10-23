@@ -578,6 +578,12 @@
                             </div>
                         </div>
 
+                        <!-- Campo Honeypot invisível para captura de spambots -->
+                        <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true" tabindex="-1">
+                            <label for="form-website-check">Deixe este campo em branco</label>
+                            <input type="text" id="form-website-check" name="website_check" autocomplete="off" tabindex="-1">
+                        </div>
+
                         <button type="submit"
                             class="w-full bg-gradient-to-r from-[#03665A] via-[#8F56AD] to-[#3B0069] text-white font-heading font-extrabold py-3.5 sm:py-4 rounded-2xl shadow-md hover:opacity-95 transition transform active:scale-98 flex items-center justify-center gap-2 text-base">
                             <i class="fa-solid fa-check-circle"></i> Confirmar e Salvar Palpite
@@ -680,6 +686,19 @@
                 class="hidden mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold">
             </div>
 
+            <!-- Banner de Bloqueio por Força Bruta (Lockout) -->
+            <div id="admin-lockout-banner"
+                class="hidden mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs animate-pop-in">
+                <div class="flex items-center gap-2 font-bold text-amber-800 mb-1">
+                    <i class="fa-solid fa-shield-halved text-amber-600 text-sm"></i>
+                    Acesso Temporariamente Bloqueado
+                </div>
+                <p class="text-[11px] text-amber-700 leading-relaxed">
+                    Muitas tentativas consecutivas incorretas. Por segurança, tente novamente em:
+                    <span id="admin-lockout-countdown" class="font-mono font-bold text-amber-900 ml-1"></span>
+                </p>
+            </div>
+
             <form id="admin-login-form" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
@@ -694,10 +713,14 @@
                         class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 focus:outline-none text-sm">
                 </div>
 
-                <button type="submit"
-                    class="w-full bg-slate-900 text-white font-heading font-semibold py-3 rounded-xl shadow hover:bg-slate-800 transition flex items-center justify-center gap-2 text-sm">
+                <button type="submit" id="btn-admin-submit-login"
+                    class="w-full bg-slate-900 text-white font-heading font-semibold py-3 rounded-xl shadow hover:bg-slate-800 transition flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fa-solid fa-right-to-bracket"></i> Entrar no Painel
                 </button>
+
+                <p class="text-[11px] text-slate-400 text-center mt-3">
+                    Credencial inicial dos pais: <span class="font-mono font-bold text-slate-600 select-all">Revelacao2026!</span>
+                </p>
             </form>
         </div>
     </div>
@@ -880,6 +903,31 @@
                                 <button type="submit"
                                     class="bg-gradient-to-r from-[#03665A] via-[#8F56AD] to-[#3B0069] text-white font-semibold px-6 py-2.5 rounded-xl shadow-md hover:opacity-95 transition text-sm">
                                     <i class="fa-solid fa-floppy-disk mr-1.5"></i> Salvar Configurações & Nomes
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Segurança & Alteração de Senha Oficial dos Pais -->
+                        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
+                            <h5 class="font-heading font-bold text-slate-800 text-sm mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-key text-pink-500"></i> Alterar Senha da Área dos Pais
+                            </h5>
+                            <p class="text-xs text-slate-500 mb-4">
+                                Atualize a credencial oficial dos pais. A senha é armazenada de forma irreversível com hash criptográfico SHA-256 via Web Crypto API.
+                            </p>
+                            <form id="admin-change-password-form" class="space-y-3 max-w-md">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1" for="current-password-input">Senha Atual</label>
+                                    <input type="password" id="current-password-input" required placeholder="Digite a senha atual"
+                                        class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 focus:outline-none text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1" for="new-password-input">Nova Senha (Mínimo 6 caracteres)</label>
+                                    <input type="password" id="new-password-input" required minlength="6" placeholder="Digite a nova senha segura"
+                                        class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 focus:outline-none text-xs">
+                                </div>
+                                <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-shield-halved text-xs text-emerald-400"></i> Atualizar Senha Criptografada
                                 </button>
                             </form>
                         </div>

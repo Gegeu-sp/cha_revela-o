@@ -234,6 +234,29 @@ function setupPublicForm() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // 1. Interceptação Anti-Robô (Honeypot invisível)
+        const honeypotVal = document.getElementById('form-website-check')?.value.trim();
+        if (honeypotVal) {
+            console.warn('Spambot interceptado pelo campo honeypot invisível.');
+            form.reset();
+            recalculateTotal();
+            if (successAlert) {
+                successAlert.classList.remove('hidden');
+                successAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            showToast('Palpite registrado com sucesso!', 'success');
+            return;
+        }
+
+        // 2. Controle de Taxa por Cliente (Cooldown de 8 segundos)
+        const lastSubmitTime = Number(sessionStorage.getItem('bolao_last_guess_submit') || 0);
+        const now = Date.now();
+        if (now - lastSubmitTime < 8000) {
+            const waitSeconds = Math.ceil((8000 - (now - lastSubmitTime)) / 1000);
+            showToast(`Aguarde mais ${waitSeconds} segundo(s) antes de enviar outro palpite.`, 'warning');
+            return;
+        }
+
         const nome = document.getElementById('nome').value.trim();
         const palpiteEl = document.querySelector('input[name="palpite"]:checked');
         const whatsapp = document.getElementById('whatsapp').value.trim();
@@ -256,6 +279,7 @@ function setupPublicForm() {
         submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registrando...`;
 
         try {
+            sessionStorage.setItem('bolao_last_guess_submit', String(Date.now()));
             await addGuess({
                 guestName: nome,
                 whatsapp,

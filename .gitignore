@@ -8,3 +8,4 @@ Thumbs.db
 *.log
 .env*
 .firebase/
+node_modules/

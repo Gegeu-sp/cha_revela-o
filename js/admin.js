@@ -1,6 +1,6 @@
 // js/admin.js - Controlador do Painel Administrativo dos Pais
 
-import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated } from './auth.js';
+import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated, getLockoutStatus, changeAdminPassword, maskPhone } from './auth.js';
 import { updateGuess, deleteGuess, addGuess, saveEventConfig, resetAllGuesses, saveDraw, getDrawHistory, resetDrawHistory } from './db.js';
 import { subscribeToState } from './state.js';
 import { triggerCelebration } from './ranking.js';
@@ -10,6 +10,7 @@ let currentState = null;
 let currentFilter = 'all'; // 'all' | 'pending' | 'confirmed'
 let isRaffling = false;
 let currentRaffleTickets = [];
+let lockoutTimerInterval = null;
 
 export function initAdminController() {
     subscribeToState((state) => {
@@ -48,6 +49,40 @@ function updateAdminAuthUI(user) {
     }
 }
 
+function updateLockoutUI() {
+    const lockoutBanner = document.getElementById('admin-lockout-banner');
+    const countdownEl = document.getElementById('admin-lockout-countdown');
+    const submitBtn = document.getElementById('btn-admin-submit-login');
+    const passwordInput = document.getElementById('admin-password');
+    const status = getLockoutStatus();
+
+    if (status.isLocked) {
+        if (lockoutBanner) lockoutBanner.classList.remove('hidden');
+        if (countdownEl) {
+            const mins = Math.floor(status.remainingSeconds / 60);
+            const secs = status.remainingSeconds % 60;
+            countdownEl.textContent = `${mins}m ${secs.toString().padStart(2, '0')}s`;
+        }
+        if (submitBtn) submitBtn.disabled = true;
+        if (passwordInput) passwordInput.disabled = true;
+    } else {
+        if (lockoutBanner) lockoutBanner.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+        if (passwordInput) passwordInput.disabled = false;
+        if (lockoutTimerInterval) {
+            clearInterval(lockoutTimerInterval);
+            lockoutTimerInterval = null;
+        }
+    }
+}
+
+function startLockoutWatcher() {
+    updateLockoutUI();
+    if (!lockoutTimerInterval) {
+        lockoutTimerInterval = setInterval(updateLockoutUI, 1000);
+    }
+}
+
 function updatePendingBadge() {
     const pendingCount = currentState?.totalPendingCount || 0;
     const badgeEl = document.getElementById('admin-pending-badge');
@@ -76,13 +111,20 @@ function setupAdminEventListeners() {
             if (isAdminAuthenticated()) {
                 openAdminDashboard();
             } else {
+                startLockoutWatcher();
                 loginModal.classList.remove('hidden');
             }
         });
     }
 
     if (closeLoginBtn && loginModal) {
-        closeLoginBtn.addEventListener('click', () => loginModal.classList.add('hidden'));
+        closeLoginBtn.addEventListener('click', () => {
+            loginModal.classList.add('hidden');
+            if (lockoutTimerInterval) {
+                clearInterval(lockoutTimerInterval);
+                lockoutTimerInterval = null;
+            }
+        });
     }
 
     if (closeDashboardBtn && dashboardModal) {
@@ -96,7 +138,7 @@ function setupAdminEventListeners() {
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
             const errorEl = document.getElementById('admin-login-error');
-            const submitBtn = loginForm.querySelector('button[type="submit"]');
+            const submitBtn = document.getElementById('btn-admin-submit-login') || loginForm.querySelector('button[type="submit"]');
 
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Entrando...`;
@@ -110,10 +152,35 @@ function setupAdminEventListeners() {
                 showToast('Login efetuado com sucesso!', 'success');
                 loginModal.classList.add('hidden');
                 loginForm.reset();
+                if (lockoutTimerInterval) {
+                    clearInterval(lockoutTimerInterval);
+                    lockoutTimerInterval = null;
+                }
                 openAdminDashboard();
             } else {
+                if (res.isLocked) {
+                    startLockoutWatcher();
+                }
                 errorEl.textContent = res.error || 'Credenciais inválidas.';
                 errorEl.classList.remove('hidden');
+            }
+        });
+    }
+
+    // Formulário de Alteração de Senha dos Pais
+    const changePassForm = document.getElementById('admin-change-password-form');
+    if (changePassForm) {
+        changePassForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentPass = document.getElementById('current-password-input').value;
+            const newPass = document.getElementById('new-password-input').value;
+
+            const res = await changeAdminPassword(currentPass, newPass);
+            if (res.success) {
+                showToast('Senha dos pais atualizada com sucesso!', 'success');
+                changePassForm.reset();
+            } else {
+                showToast(res.error || 'Erro ao atualizar senha.', 'error');
             }
         });
     }
@@ -366,11 +433,18 @@ function renderAdminGuessesTable() {
             statusBadge = `<span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1 animate-pulse"><i class="fa-solid fa-clock"></i> Aguardando Pix</span>`;
         }
 
+        const rawPhone = (g.whatsapp || '').replace(/\D/g, '');
+        const masked = maskPhone(g.whatsapp);
+        const waLink = rawPhone ? `https://wa.me/${rawPhone.length <= 11 ? '55' + rawPhone : rawPhone}` : null;
+
         return `
             <tr class="hover:bg-slate-50 transition border-b border-slate-100 text-sm ${g.status === 'pending' ? 'bg-amber-50/30' : ''}">
                 <td class="py-3 px-4 font-medium text-slate-800">
                     <div class="font-bold">${escapeHtml(g.guestName)} ${g.isManual ? '<span class="text-[10px] bg-purple-100 text-purple-700 font-bold px-1.5 py-0.5 rounded">Manual</span>' : ''}</div>
-                    <div class="text-[11px] text-slate-400 font-mono">${escapeHtml(g.whatsapp || '')}</div>
+                    <div class="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 mt-0.5">
+                        <span>${escapeHtml(masked || 'Sem telefone')}</span>
+                        ${waLink ? `<a href="${waLink}" target="_blank" class="text-emerald-600 hover:text-emerald-700" title="Abrir WhatsApp oficial"><i class="fa-brands fa-whatsapp text-xs"></i></a>` : ''}
+                    </div>
                 </td>
                 <td class="py-3 px-4"><span class="${badgeColor} px-2.5 py-1 rounded-full text-xs font-bold">${icon}</span></td>
                 <td class="py-3 px-4 text-center">

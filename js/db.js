@@ -254,19 +254,27 @@ export async function saveEventConfig(newConfig) {
 }
 
 export async function addGuess(guessData) {
+    const rawName = (guessData.guestName || '').trim();
+    const guestName = rawName.slice(0, 100) || 'Participante';
+    const quotas = Math.min(100, Math.max(1, parseInt(guessData.quotasCount) || 1));
+    const unitPrice = Number(guessData.unitPrice) || 15.00;
+    const totalAmount = Math.max(0.01, quotas * unitPrice);
+    const gender = guessData.gender === 'girl' ? 'girl' : 'boy';
+    const status = (guessData.isManual && guessData.status) ? guessData.status : 'pending';
+
     const newGuess = {
-        guestName: guessData.guestName.trim(),
-        whatsapp: guessData.whatsapp.trim(),
-        gender: guessData.gender,
-        babyNameChosen: guessData.babyNameChosen || (guessData.gender === 'boy' ? 'Menino' : 'Menina'),
-        quotasCount: Number(guessData.quotasCount) || 1,
-        unitPrice: Number(guessData.unitPrice) || 15.00,
-        totalAmount: Number(guessData.totalAmount) || 15.00,
-        status: guessData.status || "pending",
+        guestName,
+        whatsapp: (guessData.whatsapp || '').trim(),
+        gender,
+        babyNameChosen: guessData.babyNameChosen || (gender === 'boy' ? 'Menino' : 'Menina'),
+        quotasCount: quotas,
+        unitPrice,
+        totalAmount,
+        status,
         isManual: Boolean(guessData.isManual),
-        notes: guessData.notes || "",
+        notes: (guessData.notes || '').slice(0, 500),
         createdAt: new Date().toISOString(),
-        confirmedAt: guessData.status === "confirmed" ? new Date().toISOString() : null
+        confirmedAt: status === "confirmed" ? new Date().toISOString() : null
     };
 
     if (useCloud && db) {
@@ -276,7 +284,11 @@ export async function addGuess(guessData) {
             const item = { id: docRef.id, ...newGuess };
             return { success: true, ...item };
         } catch (err) {
-            console.warn('Falha no Firestore addDoc, usando fallback local:', err);
+            if (err?.code === 'permission-denied') {
+                console.warn('Firestore bloqueou o palpite por violação de regra de segurança:', err);
+            } else {
+                console.warn('Falha no Firestore addDoc, usando fallback local:', err);
+            }
         }
     }
 
@@ -297,7 +309,11 @@ export async function updateGuess(guessId, fields) {
             // Usa setDoc com merge para atualizar com segurança até registros pré-existentes ou criados offline
             await setDoc(doc(db, 'guesses', guessId), fields, { merge: true });
         } catch (err) {
-            console.warn('Erro ao atualizar no Firestore:', err);
+            if (err?.code === 'permission-denied') {
+                console.warn('Firestore bloqueou a atualização (requer autenticação administrativa):', err);
+            } else {
+                console.warn('Erro ao atualizar no Firestore:', err);
+            }
         }
     }
 
@@ -323,7 +339,11 @@ export async function deleteGuess(guessId) {
             const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
             await deleteDoc(doc(db, 'guesses', guessId));
         } catch (err) {
-            console.warn('Erro ao deletar palpite no Firestore:', err);
+            if (err?.code === 'permission-denied') {
+                console.warn('Firestore bloqueou a exclusão (requer autenticação administrativa):', err);
+            } else {
+                console.warn('Erro ao deletar palpite no Firestore:', err);
+            }
         }
     }
     return { success: true };
