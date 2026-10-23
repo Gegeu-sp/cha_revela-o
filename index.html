@@ -306,22 +306,23 @@
                 </div>
 
                 <!-- Cartões da Disputa com Nomes dos Bebês -->
-                                   <!-- Card Menino -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
+                    <!-- Card Menino -->
                     <div id="score-card-boy"
-                        class="p-6 rounded-3xl bg-gradient-to-br from-[#CEE1DF]/30 via-white to-white border-2 border-slate-100 transition shadow-sm hover:shadow-md flex flex-col justify-between h-full orthogonal-align">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-4xl icon-text-align shrink-0">🏋️</span>
-                                <div>
-                                    <h4 id="score-name-boy" class="font-heading font-extrabold text-xl text-[#03665A] leading-tight">É o Argeu Neto!</h4>
-                                    <span class="text-xs text-[#689D97] font-semibold">Time do Menino</span>
+                        class="p-4 sm:p-6 rounded-3xl bg-gradient-to-br from-[#CEE1DF]/30 via-white to-white border-2 border-slate-100 transition shadow-sm hover:shadow-md flex flex-col justify-between h-full orthogonal-align">
+                        <div class="flex items-center justify-between gap-2 mb-4">
+                            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                                <span class="text-3xl sm:text-4xl icon-text-align shrink-0">🏋️</span>
+                                <div class="min-w-0">
+                                    <h4 id="score-name-boy" class="font-heading font-extrabold text-base sm:text-xl text-[#03665A] leading-tight truncate sm:overflow-visible">É o Argeu Neto!</h4>
+                                    <span class="text-xs text-[#689D97] font-semibold block mt-0.5">Time do Menino</span>
                                 </div>
                             </div>
                             <span id="score-percent-boy"
-                                class="font-heading font-black text-3xl text-[#03665A]">50%</span>
+                                class="font-heading font-black text-2xl sm:text-3xl text-[#03665A] shrink-0">50%</span>
                         </div>
                         <div
-                            class="flex justify-between items-center text-xs font-bold text-slate-600 bg-[#CEE1DF]/30 p-3 rounded-xl border border-[#689D97]/25">
+                            class="flex justify-between items-center text-xs font-bold text-slate-600 bg-[#CEE1DF]/30 p-2.5 sm:p-3 rounded-xl border border-[#689D97]/25">
                             <span>Total de Cotas:</span>
                             <span id="score-cotas-boy" class="text-[#03665A] font-extrabold">0 cotas</span>
                         </div>
@@ -329,20 +330,20 @@
 
                     <!-- Card Menina -->
                     <div id="score-card-girl"
-                        class="p-6 rounded-3xl bg-gradient-to-br from-[#BE9ECF]/25 via-white to-white border-2 border-slate-100 transition shadow-sm hover:shadow-md flex flex-col justify-between h-full orthogonal-align">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <span class="text-4xl icon-text-align shrink-0">🪆</span>
-                                <div>
-                                    <h4 id="score-name-girl" class="font-heading font-extrabold text-xl text-[#3B0069] leading-tight">É a Livia Rodrigues!</h4>
-                                    <span class="text-xs text-[#8F56AD] font-semibold">Time da Menina</span>
+                        class="p-4 sm:p-6 rounded-3xl bg-gradient-to-br from-[#BE9ECF]/25 via-white to-white border-2 border-slate-100 transition shadow-sm hover:shadow-md flex flex-col justify-between h-full orthogonal-align">
+                        <div class="flex items-center justify-between gap-2 mb-4">
+                            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                                <span class="text-3xl sm:text-4xl icon-text-align shrink-0">🪆</span>
+                                <div class="min-w-0">
+                                    <h4 id="score-name-girl" class="font-heading font-extrabold text-base sm:text-xl text-[#3B0069] leading-tight truncate sm:overflow-visible">É a Livia Rodrigues!</h4>
+                                    <span class="text-xs text-[#8F56AD] font-semibold block mt-0.5">Time da Menina</span>
                                 </div>
                             </div>
                             <span id="score-percent-girl"
-                                class="font-heading font-black text-3xl text-[#8F56AD]">50%</span>
+                                class="font-heading font-black text-2xl sm:text-3xl text-[#8F56AD] shrink-0">50%</span>
                         </div>
                         <div
-                            class="flex justify-between items-center text-xs font-bold text-slate-600 bg-[#BE9ECF]/25 p-3 rounded-xl border border-[#8F56AD]/25">
+                            class="flex justify-between items-center text-xs font-bold text-slate-600 bg-[#BE9ECF]/25 p-2.5 sm:p-3 rounded-xl border border-[#8F56AD]/25">
                             <span>Total de Cotas:</span>
                             <span id="score-cotas-girl" class="text-[#3B0069] font-extrabold">0 cotas</span>
                         </div>
@@ -351,12 +352,12 @@
 
                 <!-- Barra de Progresso Bicolor Animada -->
                 <div class="bg-slate-100 p-1.5 rounded-full shadow-inner overflow-hidden mb-10">
-                    <div class="h-6 w-full flex rounded-full overflow-hidden">
+                    <div class="h-7 sm:h-8 w-full flex rounded-full overflow-hidden">
                         <div id="score-bar-boy"
-                            class="bg-gradient-to-r from-[#03665A] to-[#689D97] score-bar-transition flex items-center justify-center text-white text-[11px] font-black"
+                            class="bg-gradient-to-r from-[#03665A] to-[#689D97] score-bar-transition flex items-center justify-center text-white text-[11px] sm:text-xs font-black whitespace-nowrap overflow-hidden text-ellipsis px-1.5"
                             style="width: 50%;">50%</div>
                         <div id="score-bar-girl"
-                            class="bg-gradient-to-r from-[#8F56AD] to-[#3B0069] score-bar-transition flex items-center justify-center text-white text-[11px] font-black"
+                            class="bg-gradient-to-r from-[#8F56AD] to-[#3B0069] score-bar-transition flex items-center justify-center text-white text-[11px] sm:text-xs font-black whitespace-nowrap overflow-hidden text-ellipsis px-1.5"
                             style="width: 50%;">50%</div>
                     </div>
                 </div>

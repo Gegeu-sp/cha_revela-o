@@ -24,8 +24,18 @@ export function updateScoreboard(state) {
     if (barBoy && barGirl) {
         barBoy.style.width = `${boyPercent}%`;
         barGirl.style.width = `${girlPercent}%`;
-        barBoy.textContent = boyPercent > 10 ? `${boyName} (${boyPercent}%)` : `${boyPercent}%`;
-        barGirl.textContent = girlPercent > 10 ? `${girlName} (${girlPercent}%)` : `${girlPercent}%`;
+
+        const getBarText = (name, percent) => {
+            if (percent < 28) return `${percent}%`;
+            const firstName = name.split(' ')[0] || name;
+            if (percent < 40) return `${firstName} (${percent}%)`;
+            return `${name} (${percent}%)`;
+        };
+
+        barBoy.textContent = getBarText(boyName, boyPercent);
+        barGirl.textContent = getBarText(girlName, girlPercent);
+        barBoy.title = `${boyName}: ${boyPercent}% (${boyCotas} cotas)`;
+        barGirl.title = `${girlName}: ${girlPercent}% (${girlCotas} cotas)`;
     }
 
     if (percentBoyEl) percentBoyEl.textContent = `${boyPercent}%`;
