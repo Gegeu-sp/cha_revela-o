@@ -111,7 +111,7 @@ export function createWhatsAppCelebrationLink(winner, prizeTitle = 'Prêmio do B
         phone = '55' + phone;
     }
 
-    const genderText = winner.gender === 'girl' ? 'Menina 🌸' : 'Menino 🌿';
+    const genderText = winner.gender === 'girl' ? 'Menina 🪆' : 'Menino 🏋️';
     const text = `🎉 *PARABÉNS, ${winner.winnerName}!* 👶🍼✨\n\nVocê acabou de ser SORTEADO(A) no *${prizeTitle}* do nosso Chá Revelação com seu palpite para *${genderText}* (${winner.quotasCount || 1} cota(s))!\n\nEntramos em contato para celebrar e transferir o seu prêmio. Muito obrigado pelo carinho e por apoiar o nosso bebê! ❤️`;
 
     return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(text)}`;

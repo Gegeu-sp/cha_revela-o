@@ -560,8 +560,8 @@ function renderRaffleHistoryTable() {
     tbody.innerHTML = history.map((item, idx) => {
         const dateFormatted = item.drawnAt ? new Date(item.drawnAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '--';
         const genderBadge = item.gender === 'girl' ? 
-            `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#BE9ECF]/30 text-[#3B0069]">🌸 Menina</span>` : 
-            `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#CEE1DF]/60 text-[#03665A]">🌿 Menino</span>`;
+            `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#BE9ECF]/30 text-[#3B0069]">🪆 Menina</span>` : 
+            `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#CEE1DF]/60 text-[#03665A]">🏋️ Menino</span>`;
         
         const modeBadge = item.mode === 'correct' ? 
             `<span class="text-amber-700 font-semibold">Acertadores</span>` : 
@@ -630,7 +630,7 @@ async function runRaffleDraw() {
 
         if (displayName) displayName.textContent = randomTicket.guestName;
         if (displayDetail) {
-            const genderTag = randomTicket.gender === 'girl' ? '🌸 Menina' : '🌿 Menino';
+            const genderTag = randomTicket.gender === 'girl' ? '🪆 Menina' : '🏋️ Menino';
             displayDetail.textContent = `Palpite: ${genderTag} • Cota ${randomTicket.quotaNumber} de ${randomTicket.totalQuotas}`;
         }
 
@@ -682,7 +682,7 @@ async function runRaffleDraw() {
             const waBtn = document.getElementById('raffle-winner-whatsapp-btn');
 
             if (nameEl) nameEl.textContent = winner.guestName;
-            if (genderEl) genderEl.textContent = winner.gender === 'girl' ? '🌸 Votou em Menina' : '🌿 Votou em Menino';
+            if (genderEl) genderEl.textContent = winner.gender === 'girl' ? '🪆 Votou em Menina' : '🏋️ Votou em Menino';
             if (quotasEl) quotasEl.textContent = `🎟️ ${winner.totalQuotas} Cota(s) (${winner.quotaNumber}ª cota premiada)`;
 
             const waLink = createWhatsAppCelebrationLink(savedResult, prizeTitle);

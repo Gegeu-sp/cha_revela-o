@@ -206,3 +206,24 @@ img {
 .animate-winner-reveal {
     animation: confetti-burst 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
+
+/* Utilitários de Alinhamento Ortogonal, Retidão e Baseline Tipográfica */
+.orthogonal-align {
+    transform: rotate(0deg) skew(0deg);
+    -webkit-transform: rotate(0deg) skew(0deg);
+}
+
+.icon-text-align {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.baby-name-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    vertical-align: middle;
+}
+

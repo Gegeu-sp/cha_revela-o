@@ -174,7 +174,7 @@ function renderPublicGuessesTable(guesses, boyName, girlName) {
         const badgeColor = isBoy 
             ? 'bg-[#CEE1DF] text-[#03665A] border border-[#689D97]/30' 
             : 'bg-[#BE9ECF]/40 text-[#3B0069] border border-[#8F56AD]/30';
-        const babyVoted = isBoy ? `🌿 ${boyName}` : `🌸 ${girlName}`;
+        const babyVoted = isBoy ? `🏋️ ${boyName}` : `🪆 ${girlName}`;
 
         let statusBadge = '';
         if (g.status === 'confirmed') {

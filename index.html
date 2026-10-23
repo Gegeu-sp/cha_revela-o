@@ -89,10 +89,10 @@
                 </div>
                 <div class="flex flex-col min-w-0">
                     <span class="font-heading font-extrabold text-base sm:text-lg text-slate-800 leading-tight">Bolão do Baby</span>
-                    <div id="hero-baby-names" class="text-xs text-slate-500 font-semibold flex items-center gap-1 whitespace-nowrap overflow-hidden">
-                        <span class="text-[#03665A] font-bold">Argeu Neto 🌿</span>
+                    <div id="hero-baby-names" class="text-xs text-slate-500 font-semibold flex items-center gap-1.5 whitespace-nowrap overflow-hidden">
+                        <span class="text-[#03665A] font-bold inline-flex items-center gap-1">Argeu Neto 🏋️</span>
                         <span class="text-slate-400 font-normal">vs</span>
-                        <span class="text-[#3B0069] font-bold">Livia Rodrigues 🌸</span>
+                        <span class="text-[#3B0069] font-bold inline-flex items-center gap-1">Livia Rodrigues 🪆</span>
                     </div>
                 </div>
             </a>
@@ -306,16 +306,14 @@
                 </div>
 
                 <!-- Cartões da Disputa com Nomes dos Bebês -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
-                    <!-- Card Menino -->
+                                   <!-- Card Menino -->
                     <div id="score-card-boy"
-                        class="p-6 rounded-3xl bg-gradient-to-br from-[#CEE1DF]/30 via-white to-white border-2 border-slate-100 transition shadow-sm hover:shadow-md">
+                        class="p-6 rounded-3xl bg-gradient-to-br from-[#CEE1DF]/30 via-white to-white border-2 border-slate-100 transition shadow-sm hover:shadow-md flex flex-col justify-between h-full orthogonal-align">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-3">
-                                <span class="text-4xl">🌿</span>
+                                <span class="text-4xl icon-text-align shrink-0">🏋️</span>
                                 <div>
-                                    <h4 id="score-name-boy" class="font-heading font-extrabold text-xl text-[#03665A]">É
-                                        o Argeu Neto!</h4>
+                                    <h4 id="score-name-boy" class="font-heading font-extrabold text-xl text-[#03665A] leading-tight">É o Argeu Neto!</h4>
                                     <span class="text-xs text-[#689D97] font-semibold">Time do Menino</span>
                                 </div>
                             </div>
@@ -331,13 +329,12 @@
 
                     <!-- Card Menina -->
                     <div id="score-card-girl"
-                        class="p-6 rounded-3xl bg-gradient-to-br from-[#BE9ECF]/25 via-white to-white border-2 border-slate-100 transition shadow-sm hover:shadow-md">
+                        class="p-6 rounded-3xl bg-gradient-to-br from-[#BE9ECF]/25 via-white to-white border-2 border-slate-100 transition shadow-sm hover:shadow-md flex flex-col justify-between h-full orthogonal-align">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-3">
-                                <span class="text-4xl">🌸</span>
+                                <span class="text-4xl icon-text-align shrink-0">🪆</span>
                                 <div>
-                                    <h4 id="score-name-girl" class="font-heading font-extrabold text-xl text-[#3B0069]">É
-                                        a Livia Rodrigues!</h4>
+                                    <h4 id="score-name-girl" class="font-heading font-extrabold text-xl text-[#3B0069] leading-tight">É a Livia Rodrigues!</h4>
                                     <span class="text-xs text-[#8F56AD] font-semibold">Time da Menina</span>
                                 </div>
                             </div>
@@ -508,23 +505,21 @@
                             <label class="block text-sm font-semibold text-slate-700 mb-2">Qual é o seu palpite?</label>
                             <div class="grid grid-cols-2 gap-3 sm:gap-4">
                                 <label
-                                    class="cursor-pointer border-2 border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center transition hover:border-[#689D97] has-[:checked]:border-[#03665A] has-[:checked]:bg-[#CEE1DF]/30 shadow-2xs">
+                                    class="cursor-pointer border-2 border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center min-h-[148px] orthogonal-align transition hover:border-[#689D97] has-[:checked]:border-[#03665A] has-[:checked]:bg-[#CEE1DF]/30 shadow-2xs">
                                     <input type="radio" name="palpite" value="boy" required class="sr-only">
-                                    <span class="text-4xl mb-2">🌿</span>
+                                    <span class="text-4xl mb-2 icon-text-align">🏋️</span>
                                     <span id="label-boy-vote"
-                                        class="font-heading font-extrabold text-[#03665A] text-base sm:text-lg text-center">É
-                                        o Argeu Neto!</span>
-                                    <span class="text-xs text-[#03665A]/80 font-medium mt-0.5">Time do Menino</span>
+                                        class="font-heading font-extrabold text-[#03665A] text-base sm:text-lg text-center leading-tight">É o Argeu Neto!</span>
+                                    <span class="text-xs text-[#03665A]/80 font-medium mt-1">Time do Menino</span>
                                 </label>
 
                                 <label
-                                    class="cursor-pointer border-2 border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center transition hover:border-[#8F56AD] has-[:checked]:border-[#3B0069] has-[:checked]:bg-[#BE9ECF]/25 shadow-2xs">
+                                    class="cursor-pointer border-2 border-slate-200 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center min-h-[148px] orthogonal-align transition hover:border-[#8F56AD] has-[:checked]:border-[#3B0069] has-[:checked]:bg-[#BE9ECF]/25 shadow-2xs">
                                     <input type="radio" name="palpite" value="girl" required class="sr-only">
-                                    <span class="text-4xl mb-2">🌸</span>
+                                    <span class="text-4xl mb-2 icon-text-align">🪆</span>
                                     <span id="label-girl-vote"
-                                        class="font-heading font-extrabold text-[#3B0069] text-base sm:text-lg text-center">É
-                                        a Livia Rodrigues!</span>
-                                    <span class="text-xs text-[#8F56AD] font-medium mt-0.5">Time da Menina</span>
+                                        class="font-heading font-extrabold text-[#3B0069] text-base sm:text-lg text-center leading-tight">É a Livia Rodrigues!</span>
+                                    <span class="text-xs text-[#8F56AD] font-medium mt-1">Time da Menina</span>
                                 </label>
                             </div>
                         </div>
@@ -820,7 +815,7 @@
                                     <div>
                                         <label class="block text-xs font-bold uppercase text-[#03665A] mb-1"
                                             for="setting-boy-name">
-                                            🌿 Nome Escolhido para Menino
+                                            🏋️ Nome Escolhido para Menino
                                         </label>
                                         <input type="text" id="setting-boy-name" required placeholder="Ex: Lucca"
                                             class="w-full px-3.5 py-2.5 rounded-xl border border-[#689D97]/40 focus:ring-2 focus:ring-[#03665A] focus:outline-none text-sm font-bold bg-white text-[#03665A]">
@@ -828,7 +823,7 @@
                                     <div>
                                         <label class="block text-xs font-bold uppercase text-[#3B0069] mb-1"
                                             for="setting-girl-name">
-                                            🌸 Nome Escolhido para Menina
+                                            🪆 Nome Escolhido para Menina
                                         </label>
                                         <input type="text" id="setting-girl-name" required placeholder="Ex: Maya"
                                             class="w-full px-3.5 py-2.5 rounded-xl border border-[#8F56AD]/40 focus:ring-2 focus:ring-[#8F56AD] focus:outline-none text-sm font-bold bg-white text-[#3B0069]">
@@ -928,8 +923,8 @@
                                         for="manual-gender">Palpite</label>
                                     <select id="manual-gender"
                                         class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#8F56AD] focus:outline-none text-sm font-semibold">
-                                        <option value="boy">🌿 Menino</option>
-                                        <option value="girl">🌸 Menina</option>
+                                        <option value="boy">🏋️ Menino</option>
+                                        <option value="girl">🪆 Menina</option>
                                     </select>
                                 </div>
                                 <div>
@@ -989,8 +984,8 @@
                                     Sexo Revelado do Bebê
                                 </label>
                                 <select id="raffle-target-gender" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-[#8F56AD] focus:outline-none bg-white">
-                                    <option value="boy">🌿 Menino</option>
-                                    <option value="girl">🌸 Menina</option>
+                                    <option value="boy">🏋️ Menino</option>
+                                    <option value="girl">🪆 Menina</option>
                                 </select>
                             </div>
 
@@ -1128,8 +1123,8 @@
                         <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
                             for="edit-gender">Gênero</label>
                         <select id="edit-gender" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#8F56AD] focus:outline-none">
-                            <option value="boy">🌿 Menino</option>
-                            <option value="girl">🌸 Menina</option>
+                            <option value="boy">🏋️ Menino</option>
+                            <option value="girl">🪆 Menina</option>
                         </select>
                     </div>
                 </div>

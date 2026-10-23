@@ -42,14 +42,14 @@ export function updateScoreboard(state) {
             cardBoy.classList.add('leader-boy', 'border-[#03665A]');
             leaderStatusEl.innerHTML = `
                 <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#CEE1DF] text-[#03665A] text-xs font-extrabold animate-pulse shadow-sm">
-                    <i class="fa-solid fa-crown text-amber-500 text-sm"></i> ${boyName} está na liderança! 🌿
+                    <i class="fa-solid fa-crown text-amber-500 text-sm"></i> ${boyName} está na liderança! 🏋️
                 </span>
             `;
         } else if (leader === 'girl') {
             cardGirl.classList.add('leader-girl', 'border-[#8F56AD]');
             leaderStatusEl.innerHTML = `
                 <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#BE9ECF]/40 text-[#3B0069] text-xs font-extrabold animate-pulse shadow-sm">
-                    <i class="fa-solid fa-crown text-amber-500 text-sm"></i> ${girlName} está na liderança! 🌸
+                    <i class="fa-solid fa-crown text-amber-500 text-sm"></i> ${girlName} está na liderança! 🪆
                 </span>
             `;
         } else {
@@ -83,7 +83,7 @@ function renderTopContributors(topContributors, boyName, girlName) {
         const badgeColor = isBoy 
             ? 'bg-[#CEE1DF] text-[#03665A] border border-[#689D97]/30' 
             : 'bg-[#BE9ECF]/40 text-[#3B0069] border border-[#8F56AD]/30';
-        const babyVoted = isBoy ? `🌿 ${boyName}` : `🌸 ${girlName}`;
+        const babyVoted = isBoy ? `🏋️ ${boyName}` : `🪆 ${girlName}`;
         return `
             <div class="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition">
                 <div class="flex items-center gap-3">
