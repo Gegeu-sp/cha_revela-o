@@ -118,8 +118,8 @@ function renderPublicView(state) {
     const premioEstimadoEl = document.getElementById('premio-estimado');
 
     if (totalPalpitesEl) totalPalpitesEl.textContent = totalConfirmedCount.toString();
-    if (valorArrecadadoEl) valorArrecadadoEl.textContent = `R$ ${totalArrecadado.toFixed(2).replace('.', ',')}`;
-    if (premioEstimadoEl) premioEstimadoEl.textContent = `R$ ${premioEstimado.toFixed(2).replace('.', ',')}`;
+    if (valorArrecadadoEl) valorArrecadadoEl.innerHTML = `<span class="text-xs sm:text-base font-bold opacity-75 mr-0.5">R$</span>${totalArrecadado.toFixed(2).replace('.', ',')}`;
+    if (premioEstimadoEl) premioEstimadoEl.innerHTML = `<span class="text-xs sm:text-base font-bold opacity-75 mr-0.5">R$</span>${premioEstimado.toFixed(2).replace('.', ',')}`;
 
     // Indicador de Sincronização em Nuvem vs Local
     const cloudStatusEl = document.getElementById('cloud-sync-status');
