@@ -359,10 +359,12 @@ function switchAdminTab(targetTab) {
     const tabPanes = document.querySelectorAll('.admin-tab-pane');
 
     tabBtns.forEach(btn => {
-        if (btn.getAttribute('data-tab') === targetTab) {
-            btn.className = 'admin-tab-btn px-4 py-2 text-sm font-semibold text-[#3B0069] border-b-2 border-[#8F56AD] bg-[#BE9ECF]/20 rounded-t-xl transition flex items-center gap-1.5 whitespace-nowrap';
+        const isSelected = btn.getAttribute('data-tab') === targetTab;
+        btn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        if (isSelected) {
+            btn.className = 'admin-tab-btn flex-shrink-0 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-bold text-[#3B0069] bg-white rounded-xl shadow-xs transition-all flex items-center gap-2 whitespace-nowrap';
         } else {
-            btn.className = 'admin-tab-btn px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap';
+            btn.className = 'admin-tab-btn flex-shrink-0 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap';
         }
     });
 

@@ -227,3 +227,13 @@ img {
     vertical-align: middle;
 }
 
+/* Oculta scrollbar nativa mantendo rolagem funcional por toque ou trackpad */
+.no-scrollbar {
+    -ms-overflow-style: none; /* IE e Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari e Opera */
+}
+
