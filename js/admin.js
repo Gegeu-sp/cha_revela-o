@@ -1,6 +1,6 @@
 // js/admin.js - Controlador do Painel Administrativo dos Pais
 
-import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated, getLockoutStatus, changeAdminPassword, maskPhone } from './auth.js';
+import { loginAdmin, logoutAdmin, subscribeToAuth, isAdminAuthenticated, getLockoutStatus, changeAdminPassword, maskPhone, attachPhoneMask, formatPhoneInput } from './auth.js';
 import { updateGuess, deleteGuess, addGuess, saveEventConfig, resetAllGuesses, saveDraw, getDrawHistory, resetDrawHistory } from './db.js';
 import { subscribeToState } from './state.js';
 import { triggerCelebration } from './ranking.js';
@@ -248,6 +248,7 @@ function setupAdminEventListeners() {
     const manualForm = document.getElementById('admin-manual-guess-form');
     const manualQuotasInput = document.getElementById('manual-quotas');
     const manualTotalInput = document.getElementById('manual-total-amount');
+    attachPhoneMask(document.getElementById('manual-whatsapp'));
     let manualAmountCustomized = false;
 
     const syncManualDefaultAmount = () => {
@@ -376,6 +377,7 @@ function setupAdminEventListeners() {
     const closeEditBtn = document.getElementById('btn-close-edit-modal');
     const editQuotasInput = document.getElementById('edit-quotas');
     const editTotalInput = document.getElementById('edit-total-amount');
+    attachPhoneMask(document.getElementById('edit-whatsapp'));
 
     if (closeEditBtn && editModal) {
         closeEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
@@ -607,7 +609,7 @@ window.openEditGuessModal = function(guessId) {
 
     document.getElementById('edit-guess-id').value = g.id;
     document.getElementById('edit-guest-name').value = g.guestName || '';
-    document.getElementById('edit-whatsapp').value = g.whatsapp || '';
+    document.getElementById('edit-whatsapp').value = formatPhoneInput(g.whatsapp || '');
     document.getElementById('edit-gender').value = g.gender || 'boy';
     document.getElementById('edit-quotas').value = quotas;
     const unitPriceEl = document.getElementById('edit-unit-price');

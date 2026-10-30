@@ -1,7 +1,7 @@
 // js/app.js - Orquestrador Principal da Aplicação
 
 import { initDatabase, subscribeToGuesses, subscribeToEventConfig, subscribeToDraws, addGuess, isUsingCloud } from './db.js';
-import { initAuth } from './auth.js';
+import { initAuth, attachPhoneMask, formatPhoneInput } from './auth.js';
 import { updateStateFromConfig, updateStateFromGuesses, updateStateFromDraws, subscribeToState, getComputedState } from './state.js';
 import { updateScoreboard } from './ranking.js';
 import { initCountdown } from './countdown.js';
@@ -215,6 +215,9 @@ function setupPublicForm() {
     const whatsappLink = document.getElementById('whatsapp-link');
 
     if (!form) return;
+
+    // Conecta máscara automática (DD) XXXXX-XXXX ao campo de WhatsApp público
+    attachPhoneMask(document.getElementById('whatsapp'));
 
     // Recalcula valor total dinamicamente
     const recalculateTotal = () => {

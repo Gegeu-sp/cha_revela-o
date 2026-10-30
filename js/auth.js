@@ -60,6 +60,61 @@ export function maskPhone(phone) {
 }
 
 /**
+ * Formata um número de celular/telefone em tempo real no padrão (DD) XXXXX-XXXX.
+ * Suporta digitação progressiva, remoção suave com Backspace e colagem com DDI +55.
+ * @param {string} value Valor bruto digitado
+ * @returns {string} Número formatado como (DD) XXXXX-XXXX
+ */
+export function formatPhoneInput(value) {
+    if (!value) return '';
+    let digits = String(value).replace(/\D/g, '');
+
+    // Se colar número com DDI 55 (12 ou 13 dígitos começando com 55), remove o DDI automaticamente
+    if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) {
+        digits = digits.slice(2);
+    }
+
+    digits = digits.slice(0, 11);
+
+    if (digits.length === 0) return '';
+    if (digits.length <= 2) {
+        return `(${digits}`;
+    }
+    if (digits.length <= 6) {
+        return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    }
+    if (digits.length === 7) {
+        if (digits[2] === '9') {
+            return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+        }
+        return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+    if (digits.length <= 10 && digits[2] !== '9') {
+        return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6, 10)}`;
+    }
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+}
+
+/**
+ * Conecta a máscara automática (DD) XXXXX-XXXX a um elemento input de telefone.
+ * @param {HTMLInputElement|null} inputEl Elemento input
+ */
+export function attachPhoneMask(inputEl) {
+    if (!inputEl) return;
+    const applyMask = () => {
+        const formatted = formatPhoneInput(inputEl.value);
+        if (inputEl.value !== formatted) {
+            inputEl.value = formatted;
+        }
+    };
+    inputEl.addEventListener('input', applyMask);
+    inputEl.addEventListener('blur', applyMask);
+    inputEl.addEventListener('paste', () => {
+        setTimeout(applyMask, 0);
+    });
+}
+
+/**
  * Migra senhas antigas em texto plano para hash seguro e inicializa storage de credencial.
  */
 function initCredentialStorage() {
