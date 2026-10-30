@@ -33,11 +33,12 @@ export function deduplicateGuesses(guesses) {
             seenIds.add(g.id);
         }
 
-        // 2. Checagem por assinatura semântica (evita duplicações por duplo clique ou conflito temporário)
+        // 2. Checagem por assinatura semântica (janela de 5s para evitar duplo clique acidental sem bloquear cadastros manuais legítimos)
         const name = (g.guestName || '').trim().toLowerCase();
         const phone = (g.whatsapp || '').replace(/\D/g, '');
-        const timeBucket = g.createdAt ? Math.floor(new Date(g.createdAt).getTime() / (120 * 1000)) : 0;
-        const signature = `${name}_${phone}_${g.gender}_${g.quotasCount}_${timeBucket}`;
+        const total = Number(g.totalAmount || 0).toFixed(2);
+        const timeBucket = g.createdAt ? Math.floor(new Date(g.createdAt).getTime() / (5 * 1000)) : 0;
+        const signature = `${name}_${phone}_${g.gender}_${g.quotasCount}_${total}_${timeBucket}`;
         
         if (timeBucket > 0) {
             if (seenSignatures.has(signature)) continue;
@@ -92,9 +93,13 @@ export async function initDatabase() {
                     list.push({ id: docSnap.id, ...docSnap.data() });
                 });
 
+                // Preserva registros locais offline/fallback que ainda não estejam na nuvem
+                const localPendingSync = getLocalGuesses().filter(g => String(g.id || '').startsWith('local_'));
+                const combined = [...localPendingSync, ...list];
+
                 // Ordenação em memória resiliente e segura (mais recentes primeiro)
-                list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-                const deduped = deduplicateGuesses(list);
+                combined.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                const deduped = deduplicateGuesses(combined);
                 cachedGuesses = deduped;
                 localStorage.setItem('bolao_guesses', JSON.stringify(deduped));
                 notifyGuessListeners(deduped);
@@ -255,12 +260,25 @@ export async function saveEventConfig(newConfig) {
 
 export async function addGuess(guessData) {
     const rawName = (guessData.guestName || '').trim();
-    const guestName = rawName.slice(0, 100) || 'Participante';
-    const quotas = Math.min(100, Math.max(1, parseInt(guessData.quotasCount) || 1));
-    const unitPrice = Number(guessData.unitPrice) || 15.00;
-    const totalAmount = Math.max(0.01, quotas * unitPrice);
+    let guestName = rawName.slice(0, 100) || 'Participante';
+    if (guestName.length < 2) {
+        guestName = guestName.padEnd(2, '.');
+    }
+    const quotas = Math.min(100, Math.max(1, parseInt(guessData.quotasCount, 10) || 1));
+    const defaultUnitPrice = Number(guessData.unitPrice) > 0 ? Number(guessData.unitPrice) : 15.00;
+    const rawTotal = typeof guessData.totalAmount === 'string'
+        ? parseFloat(guessData.totalAmount.replace(',', '.'))
+        : Number(guessData.totalAmount);
+    const totalAmount = Math.max(
+        0.01,
+        (!isNaN(rawTotal) && rawTotal > 0)
+            ? Number(rawTotal.toFixed(2))
+            : Number((quotas * defaultUnitPrice).toFixed(2))
+    );
+    const unitPrice = Number((totalAmount / quotas).toFixed(2)) || defaultUnitPrice;
     const gender = guessData.gender === 'girl' ? 'girl' : 'boy';
     const status = (guessData.isManual && guessData.status) ? guessData.status : 'pending';
+    const nowIso = new Date().toISOString();
 
     const newGuess = {
         guestName,
@@ -273,15 +291,32 @@ export async function addGuess(guessData) {
         status,
         isManual: Boolean(guessData.isManual),
         notes: (guessData.notes || '').slice(0, 500),
-        createdAt: new Date().toISOString(),
-        confirmedAt: status === "confirmed" ? new Date().toISOString() : null
+        createdAt: nowIso,
+        confirmedAt: status === "confirmed" ? nowIso : null
     };
 
     if (useCloud && db) {
         try {
-            const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-            const docRef = await addDoc(collection(db, 'guesses'), newGuess);
+            const { collection, addDoc, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            // Cria inicialmente como 'pending' para compatibilidade com regras de segurança de criação (create) no Firestore
+            const createPayload = status === 'pending'
+                ? newGuess
+                : { ...newGuess, status: 'pending', confirmedAt: null };
+            const docRef = await addDoc(collection(db, 'guesses'), createPayload);
+
+            // Se o registro deve iniciar confirmado (ex: Adicionar Palpite Manual), promove imediatamente via update
+            if (status !== 'pending') {
+                await setDoc(doc(db, 'guesses', docRef.id), {
+                    status,
+                    confirmedAt: newGuess.confirmedAt
+                }, { merge: true });
+            }
+
             const item = { id: docRef.id, ...newGuess };
+            const current = (cachedGuesses || getLocalGuesses()).filter(g => g.id !== docRef.id);
+            const updatedList = deduplicateGuesses([item, ...current]);
+            cachedGuesses = updatedList;
+            saveLocalGuesses(updatedList);
             return { success: true, ...item };
         } catch (err) {
             if (err?.code === 'permission-denied') {
@@ -292,7 +327,7 @@ export async function addGuess(guessData) {
         }
     }
 
-    const current = getLocalGuesses();
+    const current = cachedGuesses ? [...cachedGuesses] : getLocalGuesses();
     const id = 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
     const itemWithId = { id, ...newGuess };
     current.unshift(itemWithId);
@@ -303,27 +338,30 @@ export async function addGuess(guessData) {
 }
 
 export async function updateGuess(guessId, fields) {
-    if (useCloud && db) {
-        try {
-            const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
-            // Usa setDoc com merge para atualizar com segurança até registros pré-existentes ou criados offline
-            await setDoc(doc(db, 'guesses', guessId), fields, { merge: true });
-        } catch (err) {
-            if (err?.code === 'permission-denied') {
-                console.warn('Firestore bloqueou a atualização (requer autenticação administrativa):', err);
-            } else {
-                console.warn('Erro ao atualizar no Firestore:', err);
-            }
-        }
-    }
-
-    const guesses = getLocalGuesses();
+    // 1. Atualiza imediatamente o estado em memória e localStorage para feedback instantâneo
+    const guesses = (cachedGuesses ? [...cachedGuesses] : getLocalGuesses());
     const index = guesses.findIndex(g => g.id === guessId);
     if (index !== -1) {
         guesses[index] = { ...guesses[index], ...fields };
         cachedGuesses = guesses;
         saveLocalGuesses(guesses);
     }
+
+    // 2. Persiste no Firestore quando o registro pertence à nuvem
+    if (useCloud && db && !String(guessId || '').startsWith('local_')) {
+        try {
+            const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
+            // Usa setDoc com merge para atualizar com segurança até registros pré-existentes
+            await setDoc(doc(db, 'guesses', guessId), fields, { merge: true });
+        } catch (err) {
+            if (err?.code === 'permission-denied') {
+                console.warn('Firestore bloqueou a atualização:', err);
+            } else {
+                console.warn('Erro ao atualizar no Firestore:', err);
+            }
+        }
+    }
+
     return { success: true };
 }
 

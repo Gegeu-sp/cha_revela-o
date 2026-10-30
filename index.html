@@ -961,7 +961,7 @@
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
                                         for="manual-guest-name">Nome da Pessoa</label>
-                                    <input type="text" id="manual-guest-name" required placeholder="Ex: Vovô Carlos"
+                                    <input type="text" id="manual-guest-name" minlength="2" required placeholder="Ex: Vovô Carlos"
                                         class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#8F56AD] focus:outline-none text-sm">
                                 </div>
                                 <div>
@@ -972,7 +972,7 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
                                         for="manual-gender">Palpite</label>
@@ -985,21 +985,29 @@
                                 <div>
                                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
                                         for="manual-quotas">Quantidade de Cotas</label>
-                                    <input type="number" id="manual-quotas" min="1" value="1" required
-                                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#8F56AD] focus:outline-none text-sm">
+                                    <input type="number" id="manual-quotas" min="1" max="100" value="1" required
+                                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#8F56AD] focus:outline-none text-sm font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-[#03665A] mb-1"
+                                        for="manual-total-amount">Valor Total Pago (R$)</label>
+                                    <input type="number" id="manual-total-amount" step="0.01" min="0.01" value="15.00" required
+                                        placeholder="Ex: 15.00 ou 25.00"
+                                        class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#689D97]/50 bg-[#CEE1DF]/15 focus:bg-white focus:ring-2 focus:ring-[#03665A] focus:outline-none text-sm font-extrabold text-[#03665A]">
+                                    <span class="block text-[11px] text-slate-500 mt-1">Altere livremente se a pessoa pagou outro valor.</span>
                                 </div>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
                                     for="manual-notes">Observações do Pagamento</label>
-                                <input type="text" id="manual-notes" placeholder="Ex: Pago em dinheiro vivo no almoço"
+                                <input type="text" id="manual-notes" placeholder="Ex: Pago em dinheiro vivo no almoço / Pix valor livre"
                                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#8F56AD] focus:outline-none text-sm">
                             </div>
 
-                            <button type="submit"
-                                class="bg-[#03665A] hover:bg-[#02423A] text-white font-semibold px-6 py-2.5 rounded-xl shadow-xs transition text-sm">
-                                <i class="fa-solid fa-plus mr-1.5"></i> Registrar Palpite Confirmado
+                            <button type="submit" id="btn-submit-manual-guess"
+                                class="bg-[#03665A] hover:bg-[#02423A] text-white font-semibold px-6 py-2.5 rounded-xl shadow-xs transition text-sm inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> <span>Registrar Palpite Confirmado</span>
                             </button>
                         </form>
                     </div>
@@ -1188,14 +1196,15 @@
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-600 mb-1"
                             for="edit-quotas">Cotas</label>
-                        <input type="number" min="1" id="edit-quotas" required
-                            class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#8F56AD] focus:outline-none">
+                        <input type="number" min="1" max="100" id="edit-quotas" required
+                            class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold focus:ring-2 focus:ring-[#8F56AD] focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1" for="edit-unit-price">Preço
-                            Unitário (R$)</label>
-                        <input type="number" step="0.5" id="edit-unit-price" required
-                            class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#8F56AD] focus:outline-none">
+                        <label class="block text-xs font-bold uppercase text-[#03665A] mb-1" for="edit-total-amount">Valor
+                            Total Pago (R$)</label>
+                        <input type="number" step="0.01" min="0.01" id="edit-total-amount" required
+                            class="w-full px-3 py-2 rounded-xl border-2 border-[#689D97]/50 bg-[#CEE1DF]/15 text-sm font-extrabold text-[#03665A] focus:bg-white focus:ring-2 focus:ring-[#03665A] focus:outline-none">
+                        <input type="hidden" id="edit-unit-price">
                     </div>
                 </div>
 
@@ -1265,7 +1274,7 @@
     </div>
 
     <!-- Script Principal como ES6 Module -->
-    <script type="module" src="js/app.js?v=3.1"></script>
+    <script type="module" src="js/app.js?v=3.2"></script>
 </body>
 
 </html>

@@ -244,40 +244,114 @@ function setupAdminEventListeners() {
         });
     }
 
-    // Formulário de Adicionar Palpite Manual
+    // Formulário de Adicionar Palpite Manual (com suporte a Valor Personalizado)
     const manualForm = document.getElementById('admin-manual-guess-form');
+    const manualQuotasInput = document.getElementById('manual-quotas');
+    const manualTotalInput = document.getElementById('manual-total-amount');
+    let manualAmountCustomized = false;
+
+    const syncManualDefaultAmount = () => {
+        if (!manualTotalInput || manualAmountCustomized) return;
+        const quotas = Math.max(1, parseInt(manualQuotasInput?.value, 10) || 1);
+        const defaultUnitPrice = Number(currentState?.config?.quotaPrice) || 15.00;
+        manualTotalInput.value = (quotas * defaultUnitPrice).toFixed(2);
+    };
+
+    if (manualQuotasInput) {
+        manualQuotasInput.addEventListener('input', syncManualDefaultAmount);
+        manualQuotasInput.addEventListener('change', syncManualDefaultAmount);
+    }
+
+    if (manualTotalInput) {
+        manualTotalInput.addEventListener('input', () => {
+            manualAmountCustomized = true;
+        });
+    }
+
     if (manualForm) {
         manualForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const guestName = document.getElementById('manual-guest-name').value.trim();
             const whatsapp = document.getElementById('manual-whatsapp').value.trim();
             const gender = document.getElementById('manual-gender').value;
-            const quotasCount = parseInt(document.getElementById('manual-quotas').value) || 1;
-            const unitPrice = currentState?.config?.quotaPrice || 15.00;
-            const totalAmount = quotasCount * unitPrice;
+            const quotasCount = Math.max(1, parseInt(document.getElementById('manual-quotas').value, 10) || 1);
+            const defaultUnitPrice = Number(currentState?.config?.quotaPrice) || 15.00;
+            const rawTotalVal = String(document.getElementById('manual-total-amount')?.value || '').replace(',', '.');
+            const parsedTotal = parseFloat(rawTotalVal);
+            const totalAmount = (!isNaN(parsedTotal) && parsedTotal > 0)
+                ? Number(parsedTotal.toFixed(2))
+                : Number((quotasCount * defaultUnitPrice).toFixed(2));
+            const unitPrice = Number((totalAmount / quotasCount).toFixed(2)) || defaultUnitPrice;
             const notes = document.getElementById('manual-notes').value.trim();
+
+            if (!guestName || guestName.length < 2) {
+                showToast('Informe o nome da pessoa (mínimo 2 letras).', 'error');
+                return;
+            }
 
             const babyNameChosen = gender === 'boy' ? 
                 (currentState?.config?.boyBabyName || 'Menino') : 
                 (currentState?.config?.girlBabyName || 'Menina');
 
-            await addGuess({
-                guestName,
-                whatsapp,
-                gender,
-                babyNameChosen,
-                quotasCount,
-                unitPrice,
-                totalAmount,
-                status: 'confirmed',
-                isManual: true,
-                notes: notes || 'Adicionado manualmente pelo Administrador'
-            });
+            const isCustomValue = Math.abs(totalAmount - (quotasCount * defaultUnitPrice)) >= 0.01;
+            const defaultNote = isCustomValue
+                ? `Valor personalizado (R$ ${totalAmount.toFixed(2).replace('.', ',')}) • Adicionado manualmente`
+                : 'Adicionado manualmente pelo Administrador';
 
-            manualForm.reset();
-            showToast(`Palpite de ${guestName} adicionado e confirmado!`, 'success');
-            triggerCelebration();
-            switchAdminTab('palpites');
+            const submitBtn = document.getElementById('btn-submit-manual-guess') || manualForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Registrando...</span>`;
+            }
+
+            try {
+                await addGuess({
+                    guestName,
+                    whatsapp,
+                    gender,
+                    babyNameChosen,
+                    quotasCount,
+                    unitPrice,
+                    totalAmount,
+                    status: 'confirmed',
+                    isManual: true,
+                    notes: notes || defaultNote
+                });
+
+                manualForm.reset();
+                manualAmountCustomized = false;
+                if (manualQuotasInput) manualQuotasInput.value = '1';
+                if (manualTotalInput) manualTotalInput.value = defaultUnitPrice.toFixed(2);
+
+                // Garante que o filtro da aba de registros mostre imediatamente o novo palpite confirmado
+                if (currentFilter === 'pending') {
+                    currentFilter = 'all';
+                    const filterBtns = document.querySelectorAll('.filter-guess-btn');
+                    filterBtns.forEach(b => {
+                        const isAll = b.getAttribute('data-filter') === 'all';
+                        b.className = isAll
+                            ? 'filter-guess-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-sm'
+                            : 'filter-guess-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200';
+                    });
+                }
+
+                switchAdminTab('palpites');
+                renderAdminGuessesTable();
+                updatePendingBadge();
+                updateRaffleUI();
+
+                const valorFormatado = totalAmount.toFixed(2).replace('.', ',');
+                showToast(`Palpite de ${guestName} (R$ ${valorFormatado}) registrado e confirmado!`, 'success');
+                triggerCelebration();
+            } catch (err) {
+                console.error('Erro ao registrar palpite manual:', err);
+                showToast('Erro ao registrar palpite manual. Tente novamente.', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `<i class="fa-solid fa-plus"></i> <span>Registrar Palpite Confirmado</span>`;
+                }
+            }
         });
     }
 
@@ -300,9 +374,23 @@ function setupAdminEventListeners() {
     const editModal = document.getElementById('admin-edit-guess-modal');
     const editForm = document.getElementById('admin-edit-guess-form');
     const closeEditBtn = document.getElementById('btn-close-edit-modal');
+    const editQuotasInput = document.getElementById('edit-quotas');
+    const editTotalInput = document.getElementById('edit-total-amount');
 
     if (closeEditBtn && editModal) {
         closeEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+    }
+
+    if (editQuotasInput && editTotalInput) {
+        editQuotasInput.addEventListener('change', () => {
+            if (editTotalInput.dataset.customized === 'true') return;
+            const q = Math.max(1, parseInt(editQuotasInput.value, 10) || 1);
+            const baseUnit = Number(currentState?.config?.quotaPrice) || 15.00;
+            editTotalInput.value = (q * baseUnit).toFixed(2);
+        });
+        editTotalInput.addEventListener('input', () => {
+            editTotalInput.dataset.customized = 'true';
+        });
     }
 
     if (editForm) {
@@ -312,9 +400,14 @@ function setupAdminEventListeners() {
             const guestName = document.getElementById('edit-guest-name').value.trim();
             const whatsapp = document.getElementById('edit-whatsapp').value.trim();
             const gender = document.getElementById('edit-gender').value;
-            const quotasCount = parseInt(document.getElementById('edit-quotas').value) || 1;
-            const unitPrice = parseFloat(document.getElementById('edit-unit-price').value) || 15.00;
-            const totalAmount = quotasCount * unitPrice;
+            const quotasCount = Math.max(1, parseInt(document.getElementById('edit-quotas').value, 10) || 1);
+            const defaultUnitPrice = Number(currentState?.config?.quotaPrice) || 15.00;
+            const rawEditTotal = String(document.getElementById('edit-total-amount')?.value || '').replace(',', '.');
+            const parsedEditTotal = parseFloat(rawEditTotal);
+            const totalAmount = (!isNaN(parsedEditTotal) && parsedEditTotal > 0)
+                ? Number(parsedEditTotal.toFixed(2))
+                : Number((quotasCount * defaultUnitPrice).toFixed(2));
+            const unitPrice = Number((totalAmount / quotasCount).toFixed(2)) || defaultUnitPrice;
             const status = document.getElementById('edit-status').value;
             const notes = document.getElementById('edit-notes').value.trim();
 
@@ -335,6 +428,9 @@ function setupAdminEventListeners() {
                 confirmedAt: status === 'confirmed' ? new Date().toISOString() : null
             });
 
+            renderAdminGuessesTable();
+            updatePendingBadge();
+            updateRaffleUI();
             editModal.classList.add('hidden');
             showToast('Palpite atualizado com sucesso!', 'success');
         });
@@ -376,7 +472,18 @@ function switchAdminTab(targetTab) {
         }
     });
 
-    if (targetTab === 'sorteio') {
+    if (targetTab === 'palpites') {
+        renderAdminGuessesTable();
+    } else if (targetTab === 'manual') {
+        const manualQuotasEl = document.getElementById('manual-quotas');
+        const manualTotalEl = document.getElementById('manual-total-amount');
+        const manualNameEl = document.getElementById('manual-guest-name');
+        if (manualTotalEl && (!manualNameEl || !manualNameEl.value.trim())) {
+            const quotas = Math.max(1, parseInt(manualQuotasEl?.value, 10) || 1);
+            const defaultUnitPrice = Number(currentState?.config?.quotaPrice) || 15.00;
+            manualTotalEl.value = (quotas * defaultUnitPrice).toFixed(2);
+        }
+    } else if (targetTab === 'sorteio') {
         updateRaffleUI();
     }
 }
@@ -494,12 +601,23 @@ window.openEditGuessModal = function(guessId) {
     const g = currentState.guesses.find(item => item.id === guessId);
     if (!g) return;
 
+    const quotas = g.quotasCount || 1;
+    const unitPrice = g.unitPrice || currentState?.config?.quotaPrice || 15.00;
+    const totalAmount = Number(g.totalAmount) > 0 ? Number(g.totalAmount) : (quotas * unitPrice);
+
     document.getElementById('edit-guess-id').value = g.id;
     document.getElementById('edit-guest-name').value = g.guestName || '';
     document.getElementById('edit-whatsapp').value = g.whatsapp || '';
     document.getElementById('edit-gender').value = g.gender || 'boy';
-    document.getElementById('edit-quotas').value = g.quotasCount || 1;
-    document.getElementById('edit-unit-price').value = g.unitPrice || 15.00;
+    document.getElementById('edit-quotas').value = quotas;
+    const unitPriceEl = document.getElementById('edit-unit-price');
+    if (unitPriceEl) unitPriceEl.value = unitPrice;
+    const totalAmountEl = document.getElementById('edit-total-amount');
+    if (totalAmountEl) {
+        totalAmountEl.value = totalAmount.toFixed(2);
+        const isCustom = Math.abs(totalAmount - (quotas * (currentState?.config?.quotaPrice || 15.00))) >= 0.01;
+        totalAmountEl.dataset.customized = isCustom ? 'true' : 'false';
+    }
     document.getElementById('edit-status').value = g.status || 'pending';
     document.getElementById('edit-notes').value = g.notes || '';
 
